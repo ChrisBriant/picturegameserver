@@ -4,18 +4,16 @@ from twisted.internet import reactor, ssl
 from twisted.web.server import Site
 from twisted.web.static import File
 from twisted.python import log
-from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol, listenWS
+from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol #, listenWS
 from autobahn.twisted.resource import WebSocketResource
 from resettimer import TimerReset
 
 #The timeout value in seconds to keep a room active
 ROOM_TIMEOUT_VALUE = 120
+R = redis.Redis()
 
-## TODO:  Add controls for when a message is sent to a room not in existance
 
-# TUTORIAL https://medium.com/python-in-plain-english/identify-websocket-clients-with-autobahn-twisted-and-python-3f90b4c135d4
 
-# Source: https://stackoverflow.com/questions/29951718/autobahn-sending-user-specific-and-broadcast-messages-from-external-application
 class BroadcastServerProtocol(WebSocketServerProtocol):
     def onOpen(self):
         self.factory.register(self)
@@ -59,10 +57,11 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                     'message': received_data['name']
                 }
                 self.factory.send_client(received_data['client_id'],json.dumps(send_payload))
+                print('Hello anyone home?')
                 #Broadcast client list now a name is set
                 self.factory.send_client_list()
                 #Broadcast room list
-                self.factory.send_room_list()
+                #self.factory.send_room_list()
             elif received_data['type'] == 'enter_room':
                 self.factory.enter_room(received_data['client_id'],received_data['name'])
             elif received_data['type'] == 'exit_room':
@@ -94,6 +93,25 @@ class BroadcastServerFactory(WebSocketServerFactory):
         self.rooms = {}
         self.timers = {}
 
+    #Stores an object in Redis
+    def store_object(self,id,obj):
+        obj_to_store = json.dumps(obj)
+        R.set(id,obj_to_store)
+
+    def get_from_store(self,id):
+        obj = R.get(id)
+        dict_obj = ast.literal_eval(obj.decode('utf-8'))
+        print('This is from redis',dict_obj)
+        return dict_obj
+
+    def get_clients_from_store(self):
+        cli_list = []
+        for cli in self.clients.keys():
+            obj = R.get(cli)
+            dict_obj = ast.literal_eval(obj.decode('utf-8'))
+            cli_list.append(dict_obj)
+        return cli_list
+
     def register(self, client):
         registered = [self.clients[i] for i in list(self.clients.keys())]
         ids = list(self.clients.keys())
@@ -101,10 +119,13 @@ class BroadcastServerFactory(WebSocketServerFactory):
             while (cid := str(uuid.uuid4())) in ids:
                 pass
             print("registered client {} with id {}".format(client.peer, cid))
-            self.clients[cid] = dict()
-            self.clients[cid]['client'] = client
-            self.clients[cid]['name'] = None
-            self.clients[cid]['room'] = None
+            self.clients[cid] = client
+            client_obj = {
+                'cid' : cid,
+                'name' : '',
+                'room' : ''
+            }
+            self.store_object(cid,client_obj)
             payload = {
                 'type': 'register',
                 'yourid':cid
@@ -113,9 +134,9 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
     def send_client_list(self):
         #Get the clients and create
-        clients_list = list(self.clients.keys())
-        print('client list here',clients_list)
-        clients_data = [{'id':cli, 'name':self.clients[cli]['name']} for cli in clients_list]
+        print('Coo ee')
+        #clients_data = [{'id':cli, 'name':self.clients[cli]['name']} for cli in clients_list]
+        clients_data = self.get_clients_from_store()
         payload = {
             'type' : 'client_list',
             'clients': json.dumps(clients_data)
@@ -141,7 +162,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
         #For now (for testing purposes destroy all the rooms)
         #Timer will be used to closed rooms when implemented
-        #!!!!!!!!!!!!!!!! IMPORTANT BELOW MUST BE REMOVED IN PRODUCTION FOR IT TO WORK !!!!!!!!!!!!!!!# 
+        #!!!!!!!!!!!!!!!! IMPORTANT BELOW MUST BE REMOVED IN PRODUCTION FOR IT TO WORK !!!!!!!!!!!!!!!#
         self.rooms = {}
 
 
@@ -154,11 +175,13 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
     def send_client(self,client_id,data):
         print('sending to ',client_id)
-        self.clients[client_id]['client'].sendMessage(data.encode('utf-8'))
+        self.clients[client_id].sendMessage(data.encode('utf-8'))
 
     def set_name(self,client_id,name):
-        print('set name',self.clients)
-        self.clients[client_id]['name'] = name
+        client_obj = self.get_from_store(client_id)
+        print('set name',client_obj)
+        client_obj['name'] = name
+        self.store_object(client_id,client_obj)
 
     def create_room(self,client_id,room):
         rooms = self.rooms.keys()
