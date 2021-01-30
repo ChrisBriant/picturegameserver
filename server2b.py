@@ -1,4 +1,4 @@
-import sys, redis, uuid,json,ast, threading
+import sys, redis, uuid,json,ast, threading, random
 
 from twisted.internet import reactor, ssl
 from twisted.web.server import Site
@@ -9,8 +9,23 @@ from autobahn.twisted.resource import WebSocketResource
 from resettimer import TimerReset
 
 #The timeout value in seconds to keep a room active
-ROOM_TIMEOUT_VALUE = 120
+ROOM_TIMEOUT_VALUE = 1200
 R = redis.Redis()
+
+CARD_SET = [
+                'c2','c3','c4','c5','c6','c7','c8','c9','c10','cJ','cQ','cK','cA',
+                'd2','d3','d4','d5','d6','d7','d8','d9','d10','dJ','dQ','dK','dA',
+                'h2','h3','h4','h5','h6','h7','h8','h9','h10','hJ','hQ','hK','hA',
+                's2','s3','s4','s5','s6','s7','s8','s9','s10','sJ','sQ','sK','sA'
+            ]
+
+#Deal amount of cards from deck to the members and return dict
+def deal(deck,cards,members):
+    hand = {m:[] for m in members}
+    for i in range(0,cards):
+        for member in members:
+            hand[member].append(deck.pop())
+    return hand
 
 
 
@@ -50,6 +65,8 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                 self.factory.send_client(received_data['client_id'],json.dumps(send_payload))
             elif received_data['type'] == 'create_room':
                 room_list = self.factory.create_room(received_data['client_id'],received_data['name'])
+            elif received_data['type'] == 'start_game':
+                room_list = self.factory.start_game(received_data['name'])
             elif received_data['type'] == 'name':
                 self.factory.set_name(received_data['client_id'],received_data['name'])
                 send_payload = {
@@ -77,6 +94,8 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                     }
                     room = self.factory.rooms[received_data['name']]
                     self.factory.send_room(room,send_payload)
+            elif received_data['type'] == 'play_card':
+                self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
 
 
 
@@ -92,6 +111,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
         self.clients = {}
         self.rooms = []
         self.timers = {}
+        self.games = []
 
     #Stores an object in Redis
     def store_object(self,id,obj):
@@ -101,7 +121,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
     def get_from_store(self,id):
         obj = R.get(id)
         dict_obj = ast.literal_eval(obj.decode('utf-8'))
-        print('This is from redis',dict_obj)
+        #print('This is from redis',dict_obj)
         return dict_obj
 
     def remove_from_store(self,id):
@@ -168,7 +188,9 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 client_id = cli
                 #Notify room
                 print('Here is the client ID ',client_id)
-                self.exit_room(client_id,self.get_from_store(client_id)['room'])
+                client_room = self.get_from_store(client_id)['room']
+                if client_room in self.rooms:
+                    self.exit_room(client_id,client_room)
                 del self.clients[cli]
                 self.remove_from_store(cli)
 
@@ -200,7 +222,9 @@ class BroadcastServerFactory(WebSocketServerFactory):
             room_obj = {
                 'owner' : client_id,
                 'name' : room,
-                'members' : []
+                'members' : [],
+                'locked' : 'false',
+                'game' : ''
             }
             self.store_object(room,room_obj)
             self.timers[room] = dict()
@@ -253,7 +277,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 print(e)
 
     def exit_room(self,client_id,room_name):
-        print('Let me out of here!')
+        print('Let me out of here!', room_name)
         room = self.get_from_store(room_name)
         client = self.get_from_store(client_id)
         if client_id in room['members']:
@@ -283,8 +307,44 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 }
                 self.send_room(room,send_payload)
             self.remove_from_store(room_name)
+            self.rooms.remove(room_name)
             del self.timers[room_name]
             self.send_room_list()
+
+    def start_game(self,room_name):
+        room = self.get_from_store(room_name)
+        if room['game'] == '':
+            room['locked'] = 'true'
+            game_id = 'game' + room['owner']
+            room['game'] = game_id
+            self.games.append(game_id)
+            deck = random.sample(CARD_SET,len(CARD_SET))#
+            hands = deal(deck,7,room['members'])
+            game = {
+                'cards' : deck,
+                'hands' : hands,
+                'startplayer': random.choice(list(hands.keys()))
+            }
+            #Send data to client
+            for player in hands.keys():
+                payload = {
+                    'type': 'hand',
+                    'hand': hands[player],
+                    'startplayer': game['startplayer']
+                }
+                self.clients[player].sendMessage(json.dumps(payload).encode())
+            self.store_object(game_id,game)
+            self.store_object(room_name,room)
+            print(game)
+
+
+    def play_card(self,room_name,card,client_id):
+        room = self.get_from_store(room_name)
+        game_id = 'game' + room['owner']
+        game = self.get_from_store(game_id)
+        print('ere is the game', game)
+
+
 
 
 if __name__ == "__main__":
