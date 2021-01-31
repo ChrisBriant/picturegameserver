@@ -56,6 +56,10 @@ def get_highest(trick,suit):
     return highest
 
 
+def get_order(c):
+    return c['order']
+
+
 def calc_trick(trick,trump):
     #Find if trump is played
     suit = trump[0]
@@ -65,6 +69,15 @@ def calc_trick(trick,trump):
         #print('TRUMPS',trumps)
         winner = get_highest(trick,suit)
         print('The winner is ', winner)
+    else:
+        #Get the sut of the first played card
+        first = min(trick,key=get_order)
+        print('First Card is',first)
+        suit = first['card'][0]
+        winner = get_highest(trick,suit)
+        print('The winner is ', winner)
+    return winner
+
 
 
 
@@ -375,7 +388,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     'hand': hands[player],
                     'startplayer': game['startplayer'],
                     'trump' : trump,
-                    'trick' : game['trick']
+                    'trick' : game['trick'],
+                    'completed_tricks': game['completed_tricks']
                 }
                 self.clients[player].sendMessage(json.dumps(payload).encode())
             self.store_object(game_id,game)
@@ -391,15 +405,30 @@ class BroadcastServerFactory(WebSocketServerFactory):
             #Calculate winner of trick
             game['trick'].append({
                 'player' : client_id,
-                'card' : card
+                'card' : card,
+                'order' : len(game['trick'])
             })
-            calc_trick(game['trick'],game['trump'])
-            pass
+            winner = calc_trick(game['trick'],game['trump'])
+            #Send the completed trick data back
+            game['hands'][client_id].remove(card)
+            game['startplayer'] = winner['player']
+            game['completed_tricks'].append(game['trick'])
+            for player in room['members']:
+                payload = {
+                    'type': 'hand',
+                    'hand': game['hands'][player],
+                    'startplayer': game['startplayer'],
+                    'trump' : game['trump'],
+                    'trick' : game['trick'],
+                    'completed_tricks': game['completed_tricks']
+                }
+                self.clients[player].sendMessage(json.dumps(payload).encode())
         else:
             #Add card to trick and then switch player
             game['trick'].append({
                 'player' : client_id,
-                'card' : card
+                'card' : card,
+                'order' : len(game['trick'])
             })
             #remove from hand
             print('card and hand' ,game['hands'][client_id], card)
@@ -412,7 +441,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     'hand': game['hands'][player],
                     'startplayer': game['startplayer'],
                     'trump' : game['trump'],
-                    'trick' : game['trick']
+                    'trick' : game['trick'],
+                    'completed_tricks': game['completed_tricks']
                 }
                 self.clients[player].sendMessage(json.dumps(payload).encode())
         self.store_object(game_id,game)
