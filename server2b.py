@@ -25,7 +25,46 @@ def deal(deck,cards,members):
     for i in range(0,cards):
         for member in members:
             hand[member].append(deck.pop())
-    return hand
+    if cards == 7:
+        #choose trump
+        trump = deck.pop()
+    return hand, trump
+
+def get_highest(trick,suit):
+    highest = None
+    #filter for suit
+    playable_cards = [play for play in trick if play['card'][0] == suit]
+    for card in playable_cards:
+        if card['card'][1:] == 'J':
+            cardval = 11
+        elif card['card'][1:] == 'Q':
+            cardval = 12
+        elif card['card'][1:] == 'K':
+            cardval = 13
+        elif card['card'][1:] == 'A':
+            cardval = 14
+        else:
+            cardval = int(card['card'][1:])
+        if highest and highest['val'] < cardval:
+            highest['player'] = card['player']
+            highest['val'] = cardval
+        #First iteration hhighest doesn't exist
+        if not highest:
+            highest = dict()
+            highest['player'] = card['player']
+            highest['val'] = cardval
+    return highest
+
+
+def calc_trick(trick,trump):
+    #Find if trump is played
+    suit = trump[0]
+    suits = [card['card'][0] for card in trick]
+    if suit in suits:
+        #trumps = [play['card'][1:] for play in trick if play['card'][0] == suit]
+        #print('TRUMPS',trumps)
+        winner = get_highest(trick,suit)
+        print('The winner is ', winner)
 
 
 
@@ -319,29 +358,64 @@ class BroadcastServerFactory(WebSocketServerFactory):
             room['game'] = game_id
             self.games.append(game_id)
             deck = random.sample(CARD_SET,len(CARD_SET))#
-            hands = deal(deck,7,room['members'])
+            hands, trump = deal(deck,7,room['members'])
             game = {
                 'cards' : deck,
                 'hands' : hands,
-                'startplayer': random.choice(list(hands.keys()))
+                'startplayer': random.choice(list(hands.keys())),
+                'trick' : [],
+                'trump' : trump,
+                'completed_tricks':[]
             }
+            print(game)
             #Send data to client
             for player in hands.keys():
                 payload = {
                     'type': 'hand',
                     'hand': hands[player],
-                    'startplayer': game['startplayer']
+                    'startplayer': game['startplayer'],
+                    'trump' : trump,
+                    'trick' : game['trick']
                 }
                 self.clients[player].sendMessage(json.dumps(payload).encode())
             self.store_object(game_id,game)
             self.store_object(room_name,room)
-            print(game)
+
 
 
     def play_card(self,room_name,card,client_id):
         room = self.get_from_store(room_name)
         game_id = 'game' + room['owner']
         game = self.get_from_store(game_id)
+        if len(game['trick']) + 1 == len(room['members']):
+            #Calculate winner of trick
+            game['trick'].append({
+                'player' : client_id,
+                'card' : card
+            })
+            calc_trick(game['trick'],game['trump'])
+            pass
+        else:
+            #Add card to trick and then switch player
+            game['trick'].append({
+                'player' : client_id,
+                'card' : card
+            })
+            #remove from hand
+            print('card and hand' ,game['hands'][client_id], card)
+            game['hands'][client_id].remove(card)
+            remaining_players = [p for p in room['members'] if p != client_id]
+            game['startplayer'] = remaining_players[0]
+            for player in room['members']:
+                payload = {
+                    'type': 'hand',
+                    'hand': game['hands'][player],
+                    'startplayer': game['startplayer'],
+                    'trump' : game['trump'],
+                    'trick' : game['trick']
+                }
+                self.clients[player].sendMessage(json.dumps(payload).encode())
+        self.store_object(game_id,game)
         print('ere is the game', game)
 
 
