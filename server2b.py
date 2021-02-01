@@ -378,7 +378,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'startplayer': random.choice(list(hands.keys())),
                 'trick' : [],
                 'trump' : trump,
-                'completed_tricks':[]
+                'completed_tricks':[],
+                'round_number': 1
             }
             print(game)
             #Send data to client
@@ -389,7 +390,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     'startplayer': game['startplayer'],
                     'trump' : trump,
                     'trick' : game['trick'],
-                    'completed_tricks': game['completed_tricks']
+                    'completed_tricks': game['completed_tricks'],
+                    'round_number': game['round_number']
                 }
                 self.clients[player].sendMessage(json.dumps(payload).encode())
             self.store_object(game_id,game)
@@ -406,13 +408,19 @@ class BroadcastServerFactory(WebSocketServerFactory):
             game['trick'].append({
                 'player' : client_id,
                 'card' : card,
-                'order' : len(game['trick'])
+                'order' : len(game['trick']),
             })
             winner = calc_trick(game['trick'],game['trump'])
             #Send the completed trick data back
             game['hands'][client_id].remove(card)
             game['startplayer'] = winner['player']
-            game['completed_tricks'].append(game['trick'])
+            completed_trick = {
+                'trick' : game['trick'],
+                'winner' : winner
+            }
+            game['completed_tricks'].append(completed_trick)
+            #Reset the trick to empty
+            game['trick'] = []
             for player in room['members']:
                 payload = {
                     'type': 'hand',
@@ -420,7 +428,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     'startplayer': game['startplayer'],
                     'trump' : game['trump'],
                     'trick' : game['trick'],
-                    'completed_tricks': game['completed_tricks']
+                    'completed_tricks': game['completed_tricks'],
+                    'round_number': game['round_number']
                 }
                 self.clients[player].sendMessage(json.dumps(payload).encode())
         else:
@@ -428,7 +437,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             game['trick'].append({
                 'player' : client_id,
                 'card' : card,
-                'order' : len(game['trick'])
+                'order' : len(game['trick']),
             })
             #remove from hand
             print('card and hand' ,game['hands'][client_id], card)
@@ -442,7 +451,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     'startplayer': game['startplayer'],
                     'trump' : game['trump'],
                     'trick' : game['trick'],
-                    'completed_tricks': game['completed_tricks']
+                    'completed_tricks': game['completed_tricks'],
+                    'round_number': game['round_number']
                 }
                 self.clients[player].sendMessage(json.dumps(payload).encode())
         self.store_object(game_id,game)

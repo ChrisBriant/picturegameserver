@@ -152,6 +152,10 @@ def test_startgame():
     #Second person joins
     driver.switch_to_window(driver.window_handles[1])
     driver.find_element_by_id("Room A").click()
+
+    ## TODO: Start the game and then get the cards and click
+    #cards = driver.find_elements_by_classname('cardfront')
+
     # #Second exits and joins Room B
     # driver.find_element_by_id("exit").click()
     # driver.find_element_by_id("Room B").click()
