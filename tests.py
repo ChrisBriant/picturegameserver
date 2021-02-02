@@ -5,6 +5,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 import sys, random, string, time
+from server3 import calc_round_winner
 
 driver = webdriver.Firefox()
 driver.implicitly_wait(100)
@@ -152,9 +153,48 @@ def test_startgame():
     #Second person joins
     driver.switch_to_window(driver.window_handles[1])
     driver.find_element_by_id("Room A").click()
+    driver.find_element_by_id("startgame-btn").click()
 
     ## TODO: Start the game and then get the cards and click
-    #cards = driver.find_elements_by_classname('cardfront')
+    handle1 = driver.window_handles[0]
+    handle2 = driver.window_handles[1]
+    for i in range(0,12):
+        cards = driver.find_elements_by_class_name('cardfront-img')
+        print(cards[1])
+        cards[-1].click()
+        if driver.current_window_handle == handle1:
+            driver.switch_to_window(driver.window_handles[1])
+        else:
+            print("Window one")
+            driver.switch_to_window(driver.window_handles[0])
+        # try:
+        #     driver.find_element_by_id("firstgo")
+        #     cards = driver.find_elements_by_class_name('cardfront-img')
+        #     cards[1].click()
+        #     if driver.current_window_handle == handle1:
+        #         driver.switch_to_window(driver.window_handles[1])
+        #     else:
+        #         print("Window one")
+        #         driver.switch_to_window(driver.window_handles[0])
+        # except Exception as e:
+        #     print(e)
+        #     if driver.current_window_handle == handle1:
+        #         driver.switch_to_window(driver.window_handles[1])
+        #     else:
+        #         driver.switch_to_window(driver.window_handles[0])
+        #     cards = driver.find_elements_by_class_name('cardfront-img')
+        #     cards[1].click()
+
+
+        # driver.switch_to_window(driver.window_handles[1])
+        # cards = driver.find_elements_by_class_name('cardfront-img')
+        # print(len(cards))
+        # cards[1].click()
+        # driver.switch_to_window(driver.window_handles[1])
+        # cards = driver.find_elements_by_class_name('cardfront-img')
+        # print(len(cards))
+        # cards[1].click()
+
 
     # #Second exits and joins Room B
     # driver.find_element_by_id("exit").click()
@@ -162,8 +202,27 @@ def test_startgame():
     # driver.switch_to_window(driver.window_handles[2])
     # driver.find_element_by_id("Room B").click()
 
-
-
+def test_round_winner():
+    completed_tricks = [
+        {
+            'trick' : [],
+            'winner' : 'winner A'
+        },
+        {
+            'trick' : [],
+            'winner' : 'winner B'
+        },
+        {
+            'trick' : [],
+            'winner' : 'winner C'
+        },
+        # {
+        #     'trick' : [],
+        #     'winner' : 'winner C'
+        # }
+    ]
+    result = calc_round_winner(completed_tricks)
+    print(result)
 
 if __name__ == '__main__':
     print ('Argument List:', str(sys.argv))
@@ -172,3 +231,5 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'test_startgame':
         print(str(sys.argv[1]))
         test_startgame()
+    elif sys.argv[1] == 'test_round_winner':
+        test_round_winner()

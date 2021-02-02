@@ -7,6 +7,7 @@ from twisted.python import log
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol #, listenWS
 from autobahn.twisted.resource import WebSocketResource
 from resettimer import TimerReset
+from itertools import groupby
 
 #The timeout value in seconds to keep a room active
 ROOM_TIMEOUT_VALUE = 1200000
@@ -28,6 +29,8 @@ def deal(deck,cards,members):
     if cards == 7:
         #choose trump
         trump = deck.pop()
+    else:
+        trump = ''
     return hand, trump
 
 def get_highest(trick,suit):
@@ -77,6 +80,36 @@ def calc_trick(trick,trump):
         winner = get_highest(trick,suit)
         print('The winner is ', winner)
     return winner
+
+def calc_round_winner(completed_tricks):
+    scores = []
+    for key,list in groupby(completed_tricks, lambda x: x['winner']):
+        #print(key,sum(1 for _ in list))
+        score = {
+            'player' : key,
+            'score' : sum(1 for _ in list)
+        }
+        scores.append(score)
+    #Find the highest score
+    highest = None
+    for score in scores:
+        if not highest:
+            highest = score
+        else:
+            if score['score'] > highest['score']:
+                highest = score
+    #Find if other elements are tied
+    ties = [ item for item in scores if item['score'] == highest['score']]
+    # print('scores', scores)
+    # print('highest',highest)
+    # print('ties', ties)
+    round_result = {
+        'scores' : scores,
+        'winner' : highest,
+        'ties' : ties
+    }
+    return round_result
+
 
 
 
@@ -404,14 +437,77 @@ class BroadcastServerFactory(WebSocketServerFactory):
         room = self.get_from_store(room_name)
         game_id = 'game' + room['owner']
         game = self.get_from_store(game_id)
-        print('TRICK COUNT',game['trick-count'])
         #The last card is played
         #len(game['trick']) + 1 == len(room['members']) and len(game['hands'][client_id]) == 1:
-        if game['trick-count'] == 1 and len(game['trick']) + 1 == len(room['members']):
-            #Start a new round
+        if len(game['trick']) + 1 == len(room['members']):
+            #Calculate winner of trick
+            game['trick'].append({
+                'player' : client_id,
+                'card' : card,
+                'order' : len(game['trick']),
+            })
+            #FIX THE WINNER
+            #winner = calc_trick(game['trick'],game['trump'])
+            winner =  {
+                'player': game['startplayer'],
+                'val' : 1
+            }
+
+            #Decrement the trick count
+            game['trick-count'] -= 1
+
+            #Send the completed trick data back
+            game['hands'][client_id].remove(card)
+            game['startplayer'] = winner['player']
+            completed_trick = {
+                'trick' : game['trick'],
+                'winner' : winner
+            }
+            game['completed_tricks'].append(completed_trick)
+            #Reset the trick to empty
+            game['trick'] = []
+            if game['trick-count'] == 0:
+                #Start new round
+                type = 'new-round'
+                deal_amount = 7 - game['round_number']
+                game['round_number'] += 1
+                #Deal new hands - Trump is discarded
+                deck = random.sample(CARD_SET,len(CARD_SET))#
+                hands, trump = deal(deck,deal_amount,room['members'])
+                game['trump'] = trump
+                game['hands'] = hands
+                #Calculate winner of round
+                round_result = calc_round_winner(game['completed_tricks'])
+            else:
+                type = 'hand'
+                round_result = {}
             for player in room['members']:
                 payload = {
-                    'type': 'new-round',
+                    'type': type,
+                    'hand': game['hands'][player],
+                    'startplayer': game['startplayer'],
+                    'trump' : game['trump'],
+                    'trick' : game['trick'],
+                    'completed_tricks': game['completed_tricks'],
+                    'round_number': game['round_number'],
+                    'round_result' : round_result
+                }
+                self.clients[player].sendMessage(json.dumps(payload).encode())
+        else:
+            #Add card to trick and then switch player
+            game['trick'].append({
+                'player' : client_id,
+                'card' : card,
+                'order' : len(game['trick']),
+            })
+            #remove from hand
+            print('card and hand' ,game['hands'][client_id], card)
+            game['hands'][client_id].remove(card)
+            remaining_players = [p for p in room['members'] if p != client_id]
+            game['startplayer'] = remaining_players[0]
+            for player in room['members']:
+                payload = {
+                    'type': 'hand',
                     'hand': game['hands'][player],
                     'startplayer': game['startplayer'],
                     'trump' : game['trump'],
@@ -420,70 +516,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     'round_number': game['round_number']
                 }
                 self.clients[player].sendMessage(json.dumps(payload).encode())
-        else:
-            if len(game['trick']) + 1 == len(room['members']):
-                #Calculate winner of trick
-                game['trick'].append({
-                    'player' : client_id,
-                    'card' : card,
-                    'order' : len(game['trick']),
-                })
-                #FIX THE WINNER
-                #winner = calc_trick(game['trick'],game['trump'])
-                winner =  {
-                    'player': game['startplayer'],
-                    'val' : 1
-                }
-
-                #Decrement the trick count
-                game['trick-count'] -= 1
-
-                #Send the completed trick data back
-                game['hands'][client_id].remove(card)
-                game['startplayer'] = winner['player']
-                completed_trick = {
-                    'trick' : game['trick'],
-                    'winner' : winner
-                }
-                game['completed_tricks'].append(completed_trick)
-                #Reset the trick to empty
-                game['trick'] = []
-                for player in room['members']:
-                    payload = {
-                        'type': 'hand',
-                        'hand': game['hands'][player],
-                        'startplayer': game['startplayer'],
-                        'trump' : game['trump'],
-                        'trick' : game['trick'],
-                        'completed_tricks': game['completed_tricks'],
-                        'round_number': game['round_number']
-                    }
-                    self.clients[player].sendMessage(json.dumps(payload).encode())
-            else:
-                #Add card to trick and then switch player
-                game['trick'].append({
-                    'player' : client_id,
-                    'card' : card,
-                    'order' : len(game['trick']),
-                })
-                #remove from hand
-                print('card and hand' ,game['hands'][client_id], card)
-                game['hands'][client_id].remove(card)
-                remaining_players = [p for p in room['members'] if p != client_id]
-                game['startplayer'] = remaining_players[0]
-                for player in room['members']:
-                    payload = {
-                        'type': 'hand',
-                        'hand': game['hands'][player],
-                        'startplayer': game['startplayer'],
-                        'trump' : game['trump'],
-                        'trick' : game['trick'],
-                        'completed_tricks': game['completed_tricks'],
-                        'round_number': game['round_number']
-                    }
-                    self.clients[player].sendMessage(json.dumps(payload).encode())
-            self.store_object(game_id,game)
-            print('ere is the game', game)
+        self.store_object(game_id,game)
+        print('ere is the game', game)
 
 
 
