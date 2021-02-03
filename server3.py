@@ -110,9 +110,19 @@ def calc_round_winner(completed_tricks):
     }
     return round_result
 
-
-
-
+def calc_overal_winner(results):
+    for key,list in groupby(completed_tricks, lambda x: x['winner']['player']['player']):
+        score = {
+            'player' : key,
+            'score' : sum(1 for _ in list)
+        }
+    ties = [ item for item in scores if item['score'] == highest['score']]
+    overall_result = {
+        'scores' : scores,
+        'winner' : highest,
+        'ties' : ties
+    }
+    return overall_result
 
 class BroadcastServerProtocol(WebSocketServerProtocol):
     def onOpen(self):
@@ -181,6 +191,9 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                     self.factory.send_room(room,send_payload)
             elif received_data['type'] == 'play_card':
                 self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
+            elif received_data['type'] == 'pick_trump':
+                self.factory.pick_trump(received_data['room_id'],received_data['card'],received_data['client_id'])
+
 
 
 
@@ -397,6 +410,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             self.send_room_list()
 
     def start_game(self,room_name):
+        STARTING_HAND = 1
         room = self.get_from_store(room_name)
         if room['game'] == '':
             room['locked'] = 'true'
@@ -404,16 +418,24 @@ class BroadcastServerFactory(WebSocketServerFactory):
             room['game'] = game_id
             self.games.append(game_id)
             deck = random.sample(CARD_SET,len(CARD_SET))#
-            hands, trump = deal(deck,7,room['members'])
+            hands, trump = deal(deck,STARTING_HAND,room['members'])
+
+            ###########TEST END GAME CONDITION#################
+            #Fix the round results so we are on the last round
+            fixed_round_results = self.fix_rounds()
+            ###################################################
             game = {
                 'cards' : deck,
                 'hands' : hands,
                 'startplayer': random.choice(list(hands.keys())),
                 'trick' : [],
-                'trick-count': 7,
+                'trick-count': STARTING_HAND,
                 'trump' : trump,
                 'completed_tricks':[],
-                'round_number': 1
+                #'round_number': 1,
+                #'round_results': []
+                'round_number': 7,
+                'round_results': fixed_round_results
             }
             print(game)
             #Send data to client
@@ -466,59 +488,96 @@ class BroadcastServerFactory(WebSocketServerFactory):
             game['completed_tricks'].append(completed_trick)
             #Reset the trick to empty
             game['trick'] = []
-            if game['trick-count'] == 0:
-                #Start new round
-                type = 'new-round'
-                deal_amount = 7 - game['round_number']
-                game['round_number'] += 1
-                #Deal new hands - Trump is discarded
-                deck = random.sample(CARD_SET,len(CARD_SET))#
-                hands, trump = deal(deck,deal_amount,room['members'])
-                game['trump'] = trump
-                game['hands'] = hands
-                #Calculate winner of round
-                round_result = calc_round_winner(game['completed_tricks'])
+            if game['round_number'] == 7 and game['trick-count'] == 0:
+                #Trigger end of game
+                winner = calc_overal_winner(game['round_results'])
+                remove_from_store(game_id)
             else:
-                type = 'hand'
-                round_result = {}
-            for player in room['members']:
-                payload = {
-                    'type': type,
-                    'hand': game['hands'][player],
-                    'startplayer': game['startplayer'],
-                    'trump' : game['trump'],
-                    'trick' : game['trick'],
-                    'completed_tricks': game['completed_tricks'],
-                    'round_number': game['round_number'],
-                    'round_result' : round_result
-                }
-                self.clients[player].sendMessage(json.dumps(payload).encode())
-        else:
-            #Add card to trick and then switch player
-            game['trick'].append({
-                'player' : client_id,
-                'card' : card,
-                'order' : len(game['trick']),
-            })
-            #remove from hand
-            print('card and hand' ,game['hands'][client_id], card)
-            game['hands'][client_id].remove(card)
-            remaining_players = [p for p in room['members'] if p != client_id]
-            game['startplayer'] = remaining_players[0]
-            for player in room['members']:
-                payload = {
-                    'type': 'hand',
-                    'hand': game['hands'][player],
-                    'startplayer': game['startplayer'],
-                    'trump' : game['trump'],
-                    'trick' : game['trick'],
-                    'completed_tricks': game['completed_tricks'],
-                    'round_number': game['round_number']
-                }
-                self.clients[player].sendMessage(json.dumps(payload).encode())
-        self.store_object(game_id,game)
-        print('ere is the game', game)
+                if game['trick-count'] == 0:
+                    #Start new round
+                    type = 'new_round'
+                    deal_amount = 7 - game['round_number']
+                    game['round_number'] += 1
+                    #Deal new hands - Trump is discarded
+                    deck = random.sample(CARD_SET,len(CARD_SET))#
+                    hands, trump = deal(deck,deal_amount,room['members'])
+                    game['trump'] = trump
+                    game['hands'] = hands
+                    #Calculate winner of round
+                    round_result = calc_round_winner(game['completed_tricks'])
+                    #Add the name of the winner
+                    winner_name = self.get_from_store(round_result['winner']['player']['player'])['name']
+                    round_result['winner_name'] = winner_name
+                    game['round_results'].append(round_result)
+                    print('WINNER NAME',game['round_results'])
+                else:
+                    type = 'hand'
+                    round_result = {}
+                for player in room['members']:
+                    payload = {
+                        'type': type,
+                        'hand': game['hands'][player],
+                        'startplayer': game['startplayer'],
+                        'trump' : game['trump'],
+                        'trick' : game['trick'],
+                        'completed_tricks': game['completed_tricks'],
+                        'round_number': game['round_number'],
+                        'round_result' : round_result
+                    }
+                    self.clients[player].sendMessage(json.dumps(payload).encode())
+                else:
+                    #Add card to trick and then switch player
+                    game['trick'].append({
+                        'player' : client_id,
+                        'card' : card,
+                        'order' : len(game['trick']),
+                    })
+                    #remove from hand
+                    print('card and hand' ,game['hands'][client_id], card)
+                    game['hands'][client_id].remove(card)
+                    remaining_players = [p for p in room['members'] if p != client_id]
+                    game['startplayer'] = remaining_players[0]
+                    for player in room['members']:
+                        payload = {
+                            'type': 'hand',
+                            'hand': game['hands'][player],
+                            'startplayer': game['startplayer'],
+                            'trump' : game['trump'],
+                            'trick' : game['trick'],
+                            'completed_tricks': game['completed_tricks'],
+                            'round_number': game['round_number']
+                        }
+                        self.clients[player].sendMessage(json.dumps(payload).encode())
+                self.store_object(game_id,game)
 
+    def pick_trump(self,room_name,card,client_id):
+        room = self.get_from_store(room_name)
+        game_id = 'game' + room['owner']
+        game = self.get_from_store(game_id)
+        suit = card[0]
+        game['trump'] = suit
+        for player in room['members']:
+            payload = {
+                'type': 'trump_selected',
+                'trump' : game['trump'],
+            }
+            self.clients[player].sendMessage(json.dumps(payload).encode())
+        self.store_object(game_id,game)
+
+    #For testing purposes only - lay out the rounds up until the last one
+    def fix_rounds(self):
+        round_results = []
+        rand_client = random.sample(list(self.clients.keys()),1)
+        player = self.get_from_store(rand_client[0])
+        for i in range(0,6):
+            result_obj = {
+                'scores' : [],
+                'winner': {'player': {'player': rand_client[0], 'val': 1}, 'score': 6},
+                'winner_name': player['name']
+            }
+            round_results.append(result_obj)
+        print('ROUND RESULTS', round_results)
+        return round_results
 
 
 

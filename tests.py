@@ -156,6 +156,10 @@ def test_startgame():
     driver.find_element_by_id("startgame-btn").click()
 
     ## TODO: Start the game and then get the cards and click
+
+
+def test_play_round():
+    test_startgame()
     handle1 = driver.window_handles[0]
     handle2 = driver.window_handles[1]
     for i in range(0,12):
@@ -202,6 +206,11 @@ def test_startgame():
     # driver.switch_to_window(driver.window_handles[2])
     # driver.find_element_by_id("Room B").click()
 
+def test_end_game():
+    test_startgame()
+
+
+
 def test_round_winner():
     completed_tricks = [
         {
@@ -233,3 +242,7 @@ if __name__ == '__main__':
         test_startgame()
     elif sys.argv[1] == 'test_round_winner':
         test_round_winner()
+    elif sys.argv[1] == 'test_play_round':
+        test_play_round()
+    elif sys.argv[1] == 'test_end_game':
+        test_end_game()
