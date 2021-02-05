@@ -112,36 +112,7 @@ def calc_round_winner(completed_tricks,round_number):
     }
     return round_result
 
-def calc_overal_winner(results):
-    scores = []
-    results.sort(key=lambda x: x['winner']['player']['player'])
-    print('LETS SEE THE WINNER')
-    #The list needs to be sorted first to work properly
-    for key,list in groupby(results, lambda x: x['winner']['player']['player']):
-        score = sum(1 for _ in list)
-        print(key,score)
-        score = {
-            'player' : key,
-            'score' : score
-        }
-        scores.append(score)
-    #Find the highest score
-    highest = None
-    for score in scores:
-        if not highest:
-            highest = score
-        else:
-            if score['score'] > highest['score']:
-                highest = score
-    ties = [ item for item in scores if item['score'] == highest['score']]
-    results.sort(key=lambda x: x['round_number'])
-    overall_result = {
-        'scores' : scores,
-        'winner' : highest,
-        'ties' : ties,
-        'round_results' : results
-    }
-    return overall_result
+
 
 class BroadcastServerProtocol(WebSocketServerProtocol):
     def onOpen(self):
@@ -260,6 +231,39 @@ class BroadcastServerFactory(WebSocketServerFactory):
             room_list.append(dict_obj)
         return room_list
 
+    def calc_overall_winner(self,results):
+        scores = []
+        results.sort(key=lambda x: x['winner']['player']['player'])
+        print('LETS SEE THE WINNER')
+        #The list needs to be sorted first to work properly
+        for key,list in groupby(results, lambda x: x['winner']['player']['player']):
+            score = sum(1 for _ in list)
+            print(key,score)
+            score = {
+                'player' : key,
+                'score' : score,
+                'winner_name' : self.get_from_store(key)['name']
+            }
+            scores.append(score)
+        #Find the highest score
+        highest = None
+        for score in scores:
+            if not highest:
+                highest = score
+            else:
+                if score['score'] > highest['score']:
+                    highest = score
+        ties = [ item for item in scores if item['score'] == highest['score']]
+        results.sort(key=lambda x: x['round_number'])
+        overall_result = {
+            'scores' : scores,
+            'winner' : highest,
+            'ties' : ties,
+            'round_results' : results
+        }
+        return overall_result
+
+
     def register(self, client):
         registered = [self.clients[i] for i in list(self.clients.keys())]
         ids = list(self.clients.keys())
@@ -370,20 +374,28 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
     def enter_room(self,client_id,room_name):
         room = self.get_from_store(room_name)
-        client = self.get_from_store(client_id)
-        client['room'] = room_name
-        self.store_object(client_id,client)
+        #check empty
+        if room['game'] == '':
+            client = self.get_from_store(client_id)
+            client['room'] = room_name
+            self.store_object(client_id,client)
 
-        if client_id not in room['members']:
-            room['members'].append(client_id)
+            if client_id not in room['members']:
+                room['members'].append(client_id)
+                send_payload = {
+                    'type' : 'room_entrance',
+                    'client': { 'id':client_id, 'name':client['name']},
+                    'name' : room_name,
+                    'members' : [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
+                }
+                self.send_room(room,send_payload)
+                self.store_object(room_name,room)
+        else:
             send_payload = {
-                'type' : 'room_entrance',
-                'client': { 'id':client_id, 'name':client['name']},
-                'name' : room_name,
-                'members' : [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
+                'type' : 'room_occupied',
+                'message' : 'Room {} is not available, a game is in progress.'.format(room['name']),
             }
-            self.send_room(room,send_payload)
-            self.store_object(room_name,room)
+            self.clients[client_id].sendMessage(json.dumps(send_payload).encode())
 
     #Send data to a room
     def send_room(self,room,payload):
@@ -552,7 +564,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             if game['round_number'] >= 7:
                 #Trigger end of game
                 print("END GAME", game['round_number'])
-                winner = calc_overal_winner(game['round_results'])
+                winner = self.calc_overall_winner(game['round_results'])
                 winner_name = self.get_from_store(winner['winner']['player'])['name']
                 winner['winner_name'] = winner_name
                 for player in room['members']:
