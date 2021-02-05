@@ -453,7 +453,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
             ###########TEST END GAME CONDITION#################
             #Fix the round results so we are on the last round
-            fixed_round_results = self.fix_rounds()
+            fixed_round_results = self.fix_rounds_tie(room['members'])
             trump = 'h'
             ###################################################
             game = {
@@ -567,25 +567,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 winner = self.calc_overall_winner(game['round_results'])
                 winner_name = self.get_from_store(winner['winner']['player'])['name']
                 winner['winner_name'] = winner_name
-                ##################FIX TIE BREAKER################
-                ties = [
-                    {
-                        'player': room['members'][0],
-                        'score' : 3,
-                        'winner_name' :self.get_from_store(room['members'][0])['name']
-                    },
-                    {
-                        'player': room['members'][1],
-                        'score' : 3,
-                        'winner_name' :self.get_from_store(room['members'][1])['name']
-                    }
-                ]
-                winner['ties'] = ties
-                ####################################################
-                if len(winner['ties']) > 1:
-                    #Create a tie breaker deck
-                    winner['tie_breaker_deck'] = random.sample(CARD_SET,len(CARD_SET))
-                    ## TODO: ADD A START PLAYER
                 for player in room['members']:
                     payload = {
                         'type': 'end_game',
@@ -657,7 +638,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
         round_results = []
         for i in range(0,6):
             rand_client = random.sample(list(self.clients.keys()),1)
-            player = self.get_from_store(rand_client[0])
+            player = self.get_from_store(members[0])
             result_obj = {
                 'scores' : [],
                 'winner': {'player': {'player': rand_client[0], 'val': 1}, 'score': 6},
@@ -668,7 +649,25 @@ class BroadcastServerFactory(WebSocketServerFactory):
         print('ROUND RESULTS', round_results, list(self.clients.keys()))
         return round_results
 
-
+    #TEST TIE BREAKER SITUATION
+    def fix_rounds_tie(self,members):
+        round_results = []
+        for i in range(0,6):
+            #TEST TIE BREAKER
+            if i < 2:
+                rand_client = members[0]
+            else:
+                rand_client = members[1]
+            player = self.get_from_store(rand_client)
+            result_obj = {
+                'scores' : [],
+                'winner': {'player': {'player': rand_client[0], 'val': 1}, 'score': 6},
+                'round_number': i+1,
+                'winner_name': player['name']
+            }
+            round_results.append(result_obj)
+        print('ROUND RESULTS', round_results, list(self.clients.keys()))
+        return round_results
 
 if __name__ == "__main__":
     log.startLogging(sys.stdout)
