@@ -586,6 +586,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     #Create a tie breaker deck
                     winner['tie_breaker_deck'] = random.sample(CARD_SET,len(CARD_SET))
                     ## TODO: ADD A START PLAYER
+                    winner['tie_starter'] = random.sample(winner['ties'],1)[0]['player']
                 for player in room['members']:
                     payload = {
                         'type': 'end_game',
