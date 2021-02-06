@@ -185,6 +185,9 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                 self.factory.pick_trump(received_data['room_id'],received_data['card'],received_data['client_id'])
             elif received_data['type'] == 'tie_breaker_choice':
                 self.factory.tie_break(received_data['room_id'],received_data['card'],received_data['client_id'],received_data['ties'],received_data['tie_break_id'])
+            elif received_data['type'] == 'end_tie_break':
+                self.factory.tie_break_end(received_data['room_id'],received_data['client_id'],received_data['tie_break_id'])
+
 
 
 
@@ -278,7 +281,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
     def calc_tie_winner(self,ties):
         highest = None
-        for tie in ties:
+        for tie in ties['tie_breaks']:
             suit = tie['card'][0]
             value = tie['card'][0]
             if value == 'J' :
@@ -640,6 +643,10 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     winner['tie_breaker_deck'] = random.sample(CARD_SET,len(CARD_SET))
                     ## TODO: ADD A START PLAYER
                     winner['tie_starter'] = random.sample(winner['ties'],1)[0]['player']
+                    #If on tie breaker we don't want to destry the game
+                    endofgame = False
+                else:
+                    endofgame = True
                 for player in room['members']:
                     payload = {
                         'type': 'end_game',
@@ -648,7 +655,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     }
                     self.clients[player].sendMessage(json.dumps(payload).encode())
                 #Flag to stop game from being added
-                endofgame = True
+
             else:
                 #Send the result of the completed trick wheter new round or new hand
                 for player in room['members']:
@@ -714,9 +721,12 @@ class BroadcastServerFactory(WebSocketServerFactory):
         ties = [t for t in ties if t != client_id]
         if tie_break_id == '':
             #Create new tie break object
-            tie_break_id = "tiebreak" + room_name
-            tie_break = []
-            tie_break.append(
+            tie_break_id = "tiebreak" + str(uuid.uuid4())
+            tie_break = {
+                'tie_breaks' : [],
+                'winner' : ''
+            }
+            tie_break['tie_breaks'].append(
                 {
                     'client_id' : client_id,
                     'user_name' : self.get_from_store(client_id),
@@ -725,8 +735,9 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 }
             )
         else:
+            print('TIE BREAK ID IS',tie_break_id)
             tie_break = self.get_from_store(tie_break_id)
-            tie_break.append(
+            tie_break['tie_breaks'].append(
                 {
                     'client_id' : client_id,
                     'user_name' : self.get_from_store(client_id),
@@ -741,18 +752,56 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'type': 'tie_break',
                 'start_player': winner['client_id'],
                 'ties' : ties,
-                'winner' : winner
+                'winner' : winner,
+                'tie_break_id' : tie_break_id
             }
-            self.remove_from_store(tie_break_id)
+            tie_break['winner'] = winner
         else:
             payload = {
                 'type': 'tie_break',
                 'start_player': ties[0],
                 'ties' : ties,
-                'winner' : None
+                'winner' : None,
+                'tie_break_id' : tie_break_id
             }
+        self.store_object(tie_break_id,tie_break)
         #Send tie break data
         for player in room['members']:
+            self.clients[player].sendMessage(json.dumps(payload).encode())
+
+    def tie_break_end(self,room_name,client_id,tie_break_id):
+        room = self.get_from_store(room_name)
+        game_id = 'game' + room['owner']
+        game = self.get_from_store(game_id)
+        tiebreak = self.get_from_store(tie_break_id)
+        #Get the latest round result and modify
+        last_round = [ result for result in game['round_results'] if result['round_number'] == game['round_number']]
+        last_round = last_round[0]
+        new_rounds = [ result for result in game['round_results'] if result['round_number'] != game['round_number']]
+        print('GAME ROUND RESULT', game['round_number'], tiebreak)
+        last_round['winner']['player']['player'] = tiebreak['winner']['client_id']
+        new_rounds.append(last_round)
+        game['round_results'] = new_rounds
+        #Remove the tie break object
+        self.remove_from_store(tie_break_id)
+        if game['round_number'] >= 7:
+            #End game
+            winner = self.calc_overall_winner(game['round_results'])
+            winner_name = self.get_from_store(winner['winner']['player'])['name']
+            winner['winner_name'] = winner_name
+            self.remove_from_store(game_id)
+        else:
+            #End round
+            #Winner doesn't exist yet
+            winner = None
+            #CHANGE start_player, round_result, winner
+        for player in room['members']:
+            payload = {
+                'type': 'end_tie_break',
+                'winner': winner,
+                'start_player': tiebreak['winner']['client_id'],
+                'round_result': last_round
+            }
             self.clients[player].sendMessage(json.dumps(payload).encode())
 
 
