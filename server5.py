@@ -183,6 +183,8 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                 self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
             elif received_data['type'] == 'pick_trump':
                 self.factory.pick_trump(received_data['room_id'],received_data['card'],received_data['client_id'])
+            elif received_data['type'] == 'tie_breaker_choice':
+                self.factory.tie_break(received_data['room_id'],received_data['card'],received_data['client_id'],received_data['ties'],received_data['tie_break_id'])
 
 
 
@@ -262,6 +264,57 @@ class BroadcastServerFactory(WebSocketServerFactory):
             'round_results' : results
         }
         return overall_result
+
+    def suit_to_value(self,suit):
+        #Convert the suit to a value to make tie breaking easier
+        if suit == 'h':
+            return 1
+        elif suit == 's':
+            return 2
+        elif suit == 'd':
+            return 3
+        elif suit == 'c':
+            return 4
+
+    def calc_tie_winner(self,ties):
+        highest = None
+        for tie in ties:
+            suit = tie['card'][0]
+            value = tie['card'][0]
+            if value == 'J' :
+                value = 11
+            elif value == 'Q':
+                value = 12
+            elif value == 'K':
+                value = 13
+            elif value == 'A':
+                value = 14
+            if not highest:
+                highest = {
+                    'client_id' : tie['client_id'],
+                    'user_name' :  tie['user_name'],
+                    'value' : value,
+                    'suit' : suit
+                }
+            else:
+                if value > highest['value']:
+                    highest = {
+                        'client_id' : tie['client_id'],
+                        'user_name' :  tie['user_name'],
+                        'value' : value,
+                        'suit' : suit
+                    }
+                elif value == highest['value']:
+                     #Same value so go by suit
+                     if self.suit_to_value(suit) > self.suit_to_value(highest['suit']):
+                         highest = {
+                             'client_id' : tie['client_id'],
+                             'user_name' :  tie['user_name'],
+                             'value' : value,
+                             'suit' : suit
+                         }
+        return highest    
+
 
 
     def register(self, client):
@@ -653,6 +706,49 @@ class BroadcastServerFactory(WebSocketServerFactory):
             self.clients[player].sendMessage(json.dumps(payload).encode())
         self.store_object(game_id,game)
 
+
+    def tie_break(self,room_name,card,client_id,ties,tie_break_id):
+        room = self.get_from_store(room_name)
+        print('THIS IS A TIE BREAK', room_name,card,client_id,ties,tie_break_id)
+        #Filter the ties to exclude the player
+        ties = [t for t in ties if t != client_id]
+        if tie_break_id == '':
+            #Create new tie break object
+            tie_break_id = "tiebreak" + room_name
+            tie_break = []
+            tie_break.append(
+                {
+                    'client_id' : client_id,
+                    'user_name' : self.get_from_store(client_id),
+                    'card' : card,
+                    'ties' : ties
+                }
+            )
+        else:
+            tie_break = self.get_from_store(tie_break_id)
+            tie_break.append(
+                {
+                    'client_id' : client_id,
+                    'user_name' : self.get_from_store(client_id),
+                    'card' : card,
+                    'ties' : ties
+                }
+            )
+        if len(ties) == 0:
+            self.calc_tie_winner(tie_break)
+            print("Calculating winner of tie")
+        else:
+            #Send tie break data
+            for player in room['members']:
+                payload = {
+                    'type': 'tie_break',
+                    'start_player': ties[0],
+                    'ties' : ties
+                }
+                self.clients[player].sendMessage(json.dumps(payload).encode())
+
+
+
     #For testing purposes only - lay out the rounds up until the last one
     def fix_rounds(self):
         round_results = []
@@ -668,7 +764,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
             round_results.append(result_obj)
         print('ROUND RESULTS', round_results, list(self.clients.keys()))
         return round_results
-
 
 
 if __name__ == "__main__":
