@@ -313,7 +313,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                              'value' : value,
                              'suit' : suit
                          }
-        return highest    
+        return highest
 
 
 
@@ -735,17 +735,25 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 }
             )
         if len(ties) == 0:
-            self.calc_tie_winner(tie_break)
-            print("Calculating winner of tie")
+            winner = self.calc_tie_winner(tie_break)
+            print('HERE IS THE TIE BREAK WINNER', winner)
+            payload = {
+                'type': 'tie_break',
+                'start_player': winner['client_id'],
+                'ties' : ties,
+                'winner' : winner
+            }
+            self.remove_from_store(tie_break_id)
         else:
-            #Send tie break data
-            for player in room['members']:
-                payload = {
-                    'type': 'tie_break',
-                    'start_player': ties[0],
-                    'ties' : ties
-                }
-                self.clients[player].sendMessage(json.dumps(payload).encode())
+            payload = {
+                'type': 'tie_break',
+                'start_player': ties[0],
+                'ties' : ties,
+                'winner' : None
+            }
+        #Send tie break data
+        for player in room['members']:
+            self.clients[player].sendMessage(json.dumps(payload).encode())
 
 
 
