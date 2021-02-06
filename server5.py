@@ -73,7 +73,7 @@ def calc_trick(trick,trump):
         winner = get_highest(trick,suit)
         print('The winner is ', winner)
     else:
-        #Get the sut of the first played card
+        #Get the suit of the first played card
         first = min(trick,key=get_order)
         print('First Card is',first)
         suit = first['card'][0]
@@ -497,7 +497,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             self.send_room_list()
 
     def start_game(self,room_name):
-        STARTING_HAND = 1
+        STARTING_HAND = 7
         room = self.get_from_store(room_name)
         if room['game'] == '':
             room['locked'] = 'true'
@@ -509,8 +509,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
             ###########TEST END GAME CONDITION#################
             #Fix the round results so we are on the last round
-            fixed_round_results = self.fix_rounds()
-            trump = 'h'
+            # fixed_round_results = self.fix_rounds()
+            # trump = 'h'
             ###################################################
             game = {
                 'cards' : deck,
@@ -520,10 +520,10 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'trick-count': STARTING_HAND,
                 'trump' : trump,
                 'completed_tricks':[],
-                #'round_number': 1,
-                #'round_results': []
-                'round_number': 6,
-                'round_results': fixed_round_results
+                'round_number': 1,
+                'round_results': []
+                # 'round_number': 6,
+                # 'round_results': fixed_round_results
             }
             print(game)
             #Send data to client
@@ -573,12 +573,13 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'card' : card,
                 'order' : len(game['trick']),
             })
-            #FIX THE WINNER
-            #winner = calc_trick(game['trick'],game['trump'])
-            winner =  {
-                'player': game['startplayer'],
-                'val' : 1
-            }
+            winner = calc_trick(game['trick'],game['trump'])
+
+            # FIX THE WINNER
+            # winner =  {
+            #     'player': game['startplayer'],
+            #     'val' : 1
+            # }
 
             #Decrement the trick count
             game['trick-count'] -= 1
@@ -624,19 +625,19 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 winner_name = self.get_from_store(winner['winner']['player'])['name']
                 winner['winner_name'] = winner_name
                 ##################FIX TIE BREAKER################
-                ties = [
-                    {
-                        'player': room['members'][0],
-                        'score' : 3,
-                        'winner_name' :self.get_from_store(room['members'][0])['name']
-                    },
-                    {
-                        'player': room['members'][1],
-                        'score' : 3,
-                        'winner_name' :self.get_from_store(room['members'][1])['name']
-                    }
-                ]
-                winner['ties'] = ties
+                # ties = [
+                #     {
+                #         'player': room['members'][0],
+                #         'score' : 3,
+                #         'winner_name' :self.get_from_store(room['members'][0])['name']
+                #     },
+                #     {
+                #         'player': room['members'][1],
+                #         'score' : 3,
+                #         'winner_name' :self.get_from_store(room['members'][1])['name']
+                #     }
+                # ]
+                # winner['ties'] = ties
                 ####################################################
                 if len(winner['ties']) > 1:
                     #Create a tie breaker deck

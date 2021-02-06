@@ -233,6 +233,11 @@ def test_round_winner():
     result = calc_round_winner(completed_tricks)
     print(result)
 
+## TODO:
+#   1. Block card clicking unless active player
+#   2. Card must follow suite rules - best in front end
+#   3. Test tie breaker when middle of game 
+
 if __name__ == '__main__':
     print ('Argument List:', str(sys.argv))
     if sys.argv[1] == 'set_name':
