@@ -497,7 +497,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             self.send_room_list()
 
     def start_game(self,room_name):
-        STARTING_HAND = 7
+        STARTING_HAND = 6
         room = self.get_from_store(room_name)
         if room['game'] == '':
             room['locked'] = 'true'
@@ -510,7 +510,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             ###########TEST END GAME CONDITION#################
             #Fix the round results so we are on the last round
             # fixed_round_results = self.fix_rounds()
-            # trump = 'h'
+            trump = 'h'
             ###################################################
             game = {
                 'cards' : deck,
@@ -520,9 +520,10 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'trick-count': STARTING_HAND,
                 'trump' : trump,
                 'completed_tricks':[],
-                'round_number': 1,
-                'round_results': []
-                # 'round_number': 6,
+                #'round_number': 1,
+                'round_results': [],
+                #Test values below
+                'round_number': 6,
                 # 'round_results': fixed_round_results
             }
             print(game)

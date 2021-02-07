@@ -8,7 +8,7 @@ import sys, random, string, time
 from server3 import calc_round_winner
 
 driver = webdriver.Firefox()
-driver.implicitly_wait(100)
+driver.implicitly_wait(2)
 
 
 def test_set_name():
@@ -209,6 +209,47 @@ def test_play_round():
 def test_end_game():
     test_startgame()
 
+def switch_window(current_handle,handle1):
+    if current_handle == handle1:
+        driver.switch_to_window(driver.window_handles[1])
+    else:
+        print("Window one")
+        driver.switch_to_window(driver.window_handles[0])
+
+
+def get_cards():
+    try:
+        print('Trying')
+        cards = driver.find_elements_by_class_name('cardfront-img')
+        return cards
+    except Exception as e:
+        print("No such class ", e)
+        return None
+
+def click_card(suit,cards):
+    for idx, card in enumerate(cards):
+        #image = driver.find_element_by_xpath("//img")
+        print("Image here", card.get_attribute("id"), idx)
+
+def test_tie_break_round():
+    test_startgame()
+    print("hello")
+
+    #print('Card length ',len(cards))
+    handle1 = driver.window_handles[0]
+    handle2 = driver.window_handles[1]
+
+    for i in range(0,6):
+        cards = get_cards()
+        if cards:
+            print("clicking")
+            click_card(None,cards)
+            #cards[-1].click()
+        else:
+            print("clicking after fail")
+            switch_window(driver.current_window_handle,handle1)
+            cards = get_cards()
+            #cards[-1].click()
 
 
 def test_round_winner():
@@ -234,9 +275,12 @@ def test_round_winner():
     print(result)
 
 ## TODO:
-#   1. Block card clicking unless active player
-#   2. Card must follow suite rules - best in front end
-#   3. Test tie breaker when middle of game 
+#   1. Block card clicking unless active player - DONE
+#   2. Card must follow suite rules - best in front end -DONE
+#   3. Test tie breaker when middle of game
+#   4. Factor in knockout rule
+#       I believe it needs to have an option to knock out players if 0 is scored
+#       in a round after the first one
 
 if __name__ == '__main__':
     print ('Argument List:', str(sys.argv))
@@ -251,3 +295,5 @@ if __name__ == '__main__':
         test_play_round()
     elif sys.argv[1] == 'test_end_game':
         test_end_game()
+    elif sys.argv[1] == 'test_tie_break_round':
+        test_tie_break_round()
