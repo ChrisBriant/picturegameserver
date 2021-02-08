@@ -8,7 +8,7 @@ import sys, random, string, time
 from server3 import calc_round_winner
 
 driver = webdriver.Firefox()
-driver.implicitly_wait(2)
+driver.implicitly_wait(1)
 
 
 def test_set_name():
@@ -227,9 +227,35 @@ def get_cards():
         return None
 
 def click_card(suit,cards):
-    for idx, card in enumerate(cards):
-        #image = driver.find_element_by_xpath("//img")
-        print("Image here", card.get_attribute("id"), idx)
+    if suit:
+        selected_card = None
+        for idx, card in enumerate(cards):
+            #image = driver.find_element_by_xpath("//img")
+            if card.get_attribute("id")[0] == suit:
+                selected_card = card
+            print("Image here", card.get_attribute("id"), idx)
+        if selected_card:
+            selected_card.click()
+        else:
+            cards[-1].click()
+    else:
+        cards[-1].click()
+
+def get_suit():
+    try:
+        trick = driver.find_element_by_id('latestintrick')
+        return trick.get_attribute('class')[0]
+    except Exception as e:
+        return None
+
+def is_first():
+    try:
+        driver.find_element_by_id('firstgo')
+        return True
+    except Exception as e:
+        print('notfirst', e)
+        return False
+
 
 def test_tie_break_round():
     test_startgame()
@@ -239,16 +265,20 @@ def test_tie_break_round():
     handle1 = driver.window_handles[0]
     handle2 = driver.window_handles[1]
 
-    for i in range(0,6):
+    for i in range(0,10):
+        if not is_first():
+            switch_window(driver.current_window_handle,handle1)
         cards = get_cards()
         if cards:
             print("clicking")
-            click_card(None,cards)
+            suit = get_suit()
+            print(suit)
+            click_card(suit,cards)
             #cards[-1].click()
         else:
             print("clicking after fail")
-            switch_window(driver.current_window_handle,handle1)
-            cards = get_cards()
+            #switch_window(driver.current_window_handle,handle1)
+            #cards = get_cards()
             #cards[-1].click()
 
 

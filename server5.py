@@ -82,35 +82,7 @@ def calc_trick(trick,trump):
     return winner
 
 
-def calc_round_winner(completed_tricks,round_number):
-    scores = []
-    for key,list in groupby(completed_tricks, lambda x: x['winner']):
-        #print(key,sum(1 for _ in list))
-        score = {
-            'player' : key,
-            'score' : sum(1 for _ in list)
-        }
-        scores.append(score)
-    #Find the highest score
-    highest = None
-    for score in scores:
-        if not highest:
-            highest = score
-        else:
-            if score['score'] > highest['score']:
-                highest = score
-    #Find if other elements are tied
-    ties = [ item for item in scores if item['score'] == highest['score']]
-    # print('scores', scores)
-    # print('highest',highest)
-    # print('ties', ties)
-    round_result = {
-        'scores' : scores,
-        'winner' : highest,
-        'ties' : ties,
-        'round_number':round_number
-    }
-    return round_result
+
 
 
 
@@ -235,6 +207,39 @@ class BroadcastServerFactory(WebSocketServerFactory):
             dict_obj = ast.literal_eval(obj.decode('utf-8'))
             room_list.append(dict_obj)
         return room_list
+
+    def calc_round_winner(self,completed_tricks,round_number):
+        scores = []
+        print("COMPLETED TRICKS", completed_tricks)
+        completed_tricks.sort(key=lambda x: x['winner']['player'])
+        for key,list in groupby(completed_tricks, lambda x: x['winner']['player']):
+            #print(key,sum(1 for _ in list))
+            score = {
+                'player' : key,
+                'score' : sum(1 for _ in list)
+            }
+            scores.append(score)
+        #Find the highest score
+        highest = None
+        for score in scores:
+            if not highest:
+                highest = score
+            else:
+                if score['score'] > highest['score']:
+                    highest = score
+        #Find if other elements are tied
+        ties = [ item for item in scores if item['score'] == highest['score']]
+        # print('scores', scores)
+        print('highest',highest)
+        # print('ties', ties)
+        round_result = {
+            'scores' : scores,
+            'winner' : highest,
+            'ties' : ties,
+            'round_number':round_number,
+            'winner_name': self.get_from_store(highest['player'])['name']
+        }
+        return round_result
 
     def calc_overall_winner(self,results):
         scores = []
@@ -523,7 +528,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 #'round_number': 1,
                 'round_results': [],
                 #Test values below
-                'round_number': 6,
+                'round_number': 2,
                 # 'round_results': fixed_round_results
             }
             print(game)
@@ -552,7 +557,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
         # game['trump'] = trump
         # game['hands'] = hands
         #Calculate winner of round
-        round_result = calc_round_winner(game['completed_tricks'],game['round_number'])
+        round_result = self.calc_round_winner(game['completed_tricks'],game['round_number'])
         #Add the name of the winner
         #winner_name = self.get_from_store(round_result['winner']['player']['player'])['name']
         winner_name = 'bob' #FOR NOW
@@ -610,10 +615,16 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 game['trump'] = trump
                 game['hands'] = hands
                 #Calculate winner of round
-                round_result = calc_round_winner(game['completed_tricks'],game['round_number'])
+                round_result = self.calc_round_winner(game['completed_tricks'],game['round_number'])
+
+                ############### FIX TIE BREAKER FOR TESTING
+                round_result['ties'] = self.fix_tie_breker(room['members'])
+                ###########################################
+
                 #Add the name of the winner
-                winner_name = self.get_from_store(round_result['winner']['player']['player'])['name']
-                round_result['winner_name'] = winner_name
+                #winner_name = self.get_from_store(round_result['winner']['player']['player'])['name']
+                #round_result['winner_name'] = winner_name
+
                 game['round_results'].append(round_result)
                 print('WINNER NAME',game['round_results'])
             else:
@@ -823,6 +834,18 @@ class BroadcastServerFactory(WebSocketServerFactory):
             round_results.append(result_obj)
         print('ROUND RESULTS', round_results, list(self.clients.keys()))
         return round_results
+
+
+    def fix_tie_breker(self,members):
+        ties = []
+        for memb in members:
+            tie = {
+                'player' : memb,
+                'score' : 3
+            }
+            ties.append(tie)
+        return ties
+        print("FIXING TIE BREAKER", members)
 
 
 if __name__ == "__main__":
