@@ -37,6 +37,7 @@ def get_highest(trick,suit):
     highest = None
     #filter for suit
     playable_cards = [play for play in trick if play['card'][0] == suit]
+    print('PLAYABLE CARDS', playable_cards)
     for card in playable_cards:
         if card['card'][1:] == 'J':
             cardval = 11
@@ -288,7 +289,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
         highest = None
         for tie in ties['tie_breaks']:
             suit = tie['card'][0]
-            value = tie['card'][0]
+            value = tie['card'][1]
             if value == 'J' :
                 value = 11
             elif value == 'Q':
@@ -297,6 +298,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 value = 13
             elif value == 'A':
                 value = 14
+            else:
+                value = int(value)
             if not highest:
                 highest = {
                     'client_id' : tie['client_id'],
@@ -522,7 +525,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'hands' : hands,
                 'startplayer': random.choice(list(hands.keys())),
                 'trick' : [],
-                'trick-count': STARTING_HAND,
+                'trick_count': STARTING_HAND,
                 'trump' : trump,
                 'completed_tricks':[],
                 #'round_number': 1,
@@ -588,7 +591,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             # }
 
             #Decrement the trick count
-            game['trick-count'] -= 1
+            game['trick_count'] -= 1
 
             #SOMETIMES FAILS AFTER HERE - NEED TO FIND OUT WHY
             print('GAME HANDS',client_id, game['hands'])
@@ -604,10 +607,12 @@ class BroadcastServerFactory(WebSocketServerFactory):
             game['completed_tricks'].append(completed_trick)
             #Reset the trick to empty
             game['trick'] = []
-            if game['trick-count'] == 0:
+            if game['trick_count'] == 0:
                 #Start new round
                 type = 'new_round'
                 deal_amount = 7 - game['round_number']
+                #Reset the trick count
+                game['trick_count'] = 7 - game['round_number']
                 game['round_number'] += 1
                 #Deal new hands - Trump is discarded
                 deck = random.sample(CARD_SET,len(CARD_SET))#
@@ -629,6 +634,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 #round_result['winner_name'] = winner_name
 
                 game['round_results'].append(round_result)
+                game['completed_tricks'] = []
                 print('WINNER NAME',game['round_results'])
             else:
                 type = 'hand'
@@ -762,7 +768,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             )
         if len(ties) == 0:
             winner = self.calc_tie_winner(tie_break)
-            print('HERE IS THE TIE BREAK WINNER', winner)
+            print('HERE IS THE TIE BREAK WINNER',tie_break)
             payload = {
                 'type': 'tie_break',
                 'start_player': winner['client_id'],
