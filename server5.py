@@ -620,7 +620,10 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 ############### FIX TIE BREAKER FOR TESTING
                 round_result['ties'] = self.fix_tie_breker(room['members'])
                 ###########################################
-
+                if len(round_result['ties']) > 1:
+                    #Create a tie breaker deck
+                    round_result['tie_breaker_deck'] = random.sample(CARD_SET,len(CARD_SET))
+                    round_result['tie_starter'] = random.sample(round_result['ties'],1)[0]['player']
                 #Add the name of the winner
                 #winner_name = self.get_from_store(round_result['winner']['player']['player'])['name']
                 #round_result['winner_name'] = winner_name
@@ -654,7 +657,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 if len(winner['ties']) > 1:
                     #Create a tie breaker deck
                     winner['tie_breaker_deck'] = random.sample(CARD_SET,len(CARD_SET))
-                    ## TODO: ADD A START PLAYER
                     winner['tie_starter'] = random.sample(winner['ties'],1)[0]['player']
                     #If on tie breaker we don't want to destry the game
                     endofgame = False
@@ -791,8 +793,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
         last_round = [ result for result in game['round_results'] if result['round_number'] == game['round_number']]
         last_round = last_round[0]
         new_rounds = [ result for result in game['round_results'] if result['round_number'] != game['round_number']]
-        print('GAME ROUND RESULT', game['round_number'], tiebreak)
-        last_round['winner']['player']['player'] = tiebreak['winner']['client_id']
+        print('GAME ROUND RESULT', last_round)
+        last_round['winner']['player'] = tiebreak['winner']['client_id']
         new_rounds.append(last_round)
         game['round_results'] = new_rounds
         #Remove the tie break object
