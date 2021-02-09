@@ -6,3 +6,4 @@ python3 tests.py test_startgame
 python3 tests.py test_end_game
 python3 tests.py test_play_round
 python3 tests.py test_tie_break_round
+python3 tests.py test_three_player_knockout

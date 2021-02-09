@@ -547,6 +547,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'trick_count': STARTING_HAND,
                 'trump' : trump,
                 'completed_tricks':[],
+                'remaining_players':room['members'],
                 #'round_number': 1,
                 'round_results': [],
                 #Test values below
@@ -602,6 +603,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'order' : len(game['trick']),
             })
             winner = calc_trick(game['trick'],game['trump'])
+            #Reset the remaining players
+            game['remaining_players'] = room['members']
 
             # FIX THE WINNER
             # winner =  {
@@ -633,6 +636,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 #Reset the trick count
                 game['trick_count'] = 7 - game['round_number']
                 game['round_number'] += 1
+                game['remaining_players'] = room['members']
                 #Deal new hands - Trump is discarded
 
                 #Calculate winner of round
@@ -650,7 +654,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 game['hands'] = hands
 
                 ############### FIX TIE BREAKER FOR TESTING
-                round_result['ties'] = self.fix_tie_breker(room['members'])
+                #round_result['ties'] = self.fix_tie_breker(room['members'])
                 ###########################################
 
                 if len(round_result['ties']) > 1:
@@ -727,10 +731,10 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'order' : len(game['trick']),
             })
             #remove from hand
-            print('card and hand' ,game['hands'][client_id], card)
+            print('REMAINING PLAYERS' ,game['remaining_players'])
             game['hands'][client_id].remove(card)
-            remaining_players = [p for p in room['members'] if p != client_id]
-            game['startplayer'] = remaining_players[0]
+            game['remaining_players'] = [p for p in game['remaining_players'] if p != client_id]
+            game['startplayer'] = game['remaining_players'][0]
             for player in room['members']:
                 payload = {
                     'type': 'hand',

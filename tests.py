@@ -281,6 +281,63 @@ def test_tie_break_round():
             #cards = get_cards()
             #cards[-1].click()
 
+def setup_three_players():
+    #Open four sessions
+    for i in range(0,2):
+        driver.execute_script('window.open("");')
+        driver.get('http://localhost:3000/')
+        letters = string.ascii_letters
+        name = ''.join(random.choice(letters) for i in range(6))
+        driver.find_element_by_id("name").send_keys(name)
+        driver.find_element_by_id("sendname").click()
+        driver.switch_to_window(driver.window_handles[-1])
+    driver.get('http://localhost:3000/')
+    letters = string.ascii_letters
+    name = ''.join(random.choice(letters) for i in range(6))
+    driver.find_element_by_id("name").send_keys(name)
+    driver.find_element_by_id("sendname").click()
+
+    #Create a room
+    driver.switch_to_window(driver.window_handles[0])
+    driver.find_element_by_id("room-name").send_keys('Room A')
+    driver.find_element_by_id("sendroom").click()
+
+    #First two windows open room a
+    driver.switch_to_window(driver.window_handles[0])
+    driver.find_element_by_id("Room A").click()
+    #Second person joins
+    driver.switch_to_window(driver.window_handles[1])
+    driver.find_element_by_id("Room A").click()
+    #Third person joins
+    driver.switch_to_window(driver.window_handles[2])
+    driver.find_element_by_id("Room A").click()
+    driver.find_element_by_id("startgame-btn").click()
+
+def switch_toactive(handles):
+    for handle in handles:
+        driver.switch_to_window(handle)
+        if is_first():
+            return
+
+def test_three_player_knockout():
+    setup_three_players()
+
+    handles = []
+    handles.append(driver.window_handles[0])
+    handles.append(driver.window_handles[1])
+    handles.append(driver.window_handles[2])
+
+    for i in range(0,1):
+        switch_toactive(handles)
+        cards = get_cards()
+        if cards:
+            print("clicking")
+            suit = get_suit()
+            print(suit)
+            click_card(suit,cards)
+            #cards[-1].click()
+        else:
+            print("clicking after fail")
 
 def test_round_winner():
     completed_tricks = [
@@ -327,3 +384,5 @@ if __name__ == '__main__':
         test_end_game()
     elif sys.argv[1] == 'test_tie_break_round':
         test_tie_break_round()
+    elif sys.argv[1] == 'test_three_player_knockout':
+        test_three_player_knockout()
