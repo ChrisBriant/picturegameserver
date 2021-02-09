@@ -265,7 +265,7 @@ def test_tie_break_round():
     handle1 = driver.window_handles[0]
     handle2 = driver.window_handles[1]
 
-    for i in range(0,10):
+    for i in range(0,12):
         if not is_first():
             switch_window(driver.current_window_handle,handle1)
         cards = get_cards()

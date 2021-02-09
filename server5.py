@@ -274,6 +274,25 @@ class BroadcastServerFactory(WebSocketServerFactory):
         }
         return overall_result
 
+    def calc_knockout(self,round,scores,game,room):
+        if round > 1:
+            knockouts = [player for player in scores if player['score'] == 0]
+            print('KNOCKOUTS',knockouts, len(knockouts))
+            if len(knockouts) > 0:
+                for player in knockouts:
+                    room['members'].remove(player['player'])
+                    send_payload = {
+                        'type': 'knockout'
+                    }
+                    self.clients[player['player']].sendMessage(json.dumps(send_payload).encode())
+                if len(room['members']) == 1:
+                    #All OTHER PLAYERS HAVE BEEN KNOCKED OUT
+                    send_payload = {
+                        'type' : 'win_as_knockout'
+                    }
+                    self.clients[room['members'][0]].sendMessage(json.dumps(send_payload).encode())
+
+
     def suit_to_value(self,suit):
         #Convert the suit to a value to make tie breaking easier
         if suit == 'h':
@@ -615,16 +634,25 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 game['trick_count'] = 7 - game['round_number']
                 game['round_number'] += 1
                 #Deal new hands - Trump is discarded
+
+                #Calculate winner of round
+                round_result = self.calc_round_winner(game['completed_tricks'],game['round_number'])
+                # Knockout procedure - round number - 1 because we need to check not first round
+
+                ############### FIX SCORES #######################
+                #round_result['scores'][0]['score'] = 0
+                ###########################################
+
+                self.calc_knockout(game['round_number'] - 1,round_result['scores'],game,room)
                 deck = random.sample(CARD_SET,len(CARD_SET))#
                 hands, trump = deal(deck,deal_amount,room['members'])
                 game['trump'] = trump
                 game['hands'] = hands
-                #Calculate winner of round
-                round_result = self.calc_round_winner(game['completed_tricks'],game['round_number'])
 
                 ############### FIX TIE BREAKER FOR TESTING
                 round_result['ties'] = self.fix_tie_breker(room['members'])
                 ###########################################
+
                 if len(round_result['ties']) > 1:
                     #Create a tie breaker deck
                     round_result['tie_breaker_deck'] = random.sample(CARD_SET,len(CARD_SET))
