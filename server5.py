@@ -63,6 +63,10 @@ def get_highest(trick,suit):
 def get_order(c):
     return c['order']
 
+#Only used for testing
+def get_score(c):
+    return c['score']
+
 
 def calc_trick(trick,trump):
     #Find if trump is played
@@ -274,13 +278,14 @@ class BroadcastServerFactory(WebSocketServerFactory):
         }
         return overall_result
 
-    def calc_knockout(self,round,scores,game,room):
+    def calc_knockout(self,round,scores,game,room,room_name):
         if round > 1:
             knockouts = [player for player in scores if player['score'] == 0]
             print('KNOCKOUTS',knockouts, len(knockouts))
             if len(knockouts) > 0:
                 for player in knockouts:
                     room['members'].remove(player['player'])
+                    print('AT KNOCKOUT', room['members'],player['player'])
                     send_payload = {
                         'type': 'knockout'
                     }
@@ -291,6 +296,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                         'type' : 'win_as_knockout'
                     }
                     self.clients[room['members'][0]].sendMessage(json.dumps(send_payload).encode())
+        self.store_object(room_name,room)
 
 
     def suit_to_value(self,suit):
@@ -493,6 +499,10 @@ class BroadcastServerFactory(WebSocketServerFactory):
         room = self.get_from_store(room_name)
         client = self.get_from_store(client_id)
         if client_id in room['members']:
+            #Get the game in progress
+            game_id = 'game' + room['owner']
+            game = self.get_from_store(game_id)
+            print('THE GAME', game)
             send_payload = {
                 'type' : 'room_exit',
                 'client': { 'id':client_id, 'name':client['name']},
@@ -504,6 +514,11 @@ class BroadcastServerFactory(WebSocketServerFactory):
             #Now remove the member
             room['members'].remove(client_id)
             self.store_object(room_name,room)
+        else:
+            send_payload = {
+                'type' : 'room_exit_nonmember',
+            }
+            self.clients[client_id].sendMessage(json.dumps(send_payload).encode())
         client['room'] = None
         self.store_object(client_id,client)
 
@@ -548,10 +563,10 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'trump' : trump,
                 'completed_tricks':[],
                 'remaining_players':room['members'],
-                #'round_number': 1,
+                'round_number': 2,
                 'round_results': [],
                 #Test values below
-                'round_number': 2,
+                #'round_number': 2,
                 # 'round_results': fixed_round_results
             }
             print(game)
@@ -644,10 +659,12 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 # Knockout procedure - round number - 1 because we need to check not first round
 
                 ############### FIX SCORES #######################
-                #round_result['scores'][0]['score'] = 0
+                lowest = min(round_result['scores'],key=get_score)
+                #print("LOWEST", lowest)
+                lowest['score'] = 0
                 ###########################################
 
-                self.calc_knockout(game['round_number'] - 1,round_result['scores'],game,room)
+                self.calc_knockout(game['round_number'] - 1,round_result['scores'],game,room,room_name)
                 deck = random.sample(CARD_SET,len(CARD_SET))#
                 hands, trump = deal(deck,deal_amount,room['members'])
                 game['trump'] = trump
@@ -708,7 +725,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     }
                     self.clients[player].sendMessage(json.dumps(payload).encode())
                 #Flag to stop game from being added
-
             else:
                 #Send the result of the completed trick wheter new round or new hand
                 for player in room['members']:
@@ -732,7 +748,11 @@ class BroadcastServerFactory(WebSocketServerFactory):
             })
             #remove from hand
             print('REMAINING PLAYERS' ,game['remaining_players'])
-            game['hands'][client_id].remove(card)
+            #FOR NOW CATCH THE EXCEPTION BELOW, BUT MIGHT BE DEEPER ISSUE
+            try:
+                game['hands'][client_id].remove(card)
+            except Exception as e:
+                print(e)
             game['remaining_players'] = [p for p in game['remaining_players'] if p != client_id]
             game['startplayer'] = game['remaining_players'][0]
             for player in room['members']:
@@ -805,7 +825,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'type': 'tie_break',
                 'start_player': winner['client_id'],
                 'ties' : ties,
-                'winner' : winner,
+                'winner' : winner['client_id'],
                 'tie_break_id' : tie_break_id
             }
             tie_break['winner'] = winner
