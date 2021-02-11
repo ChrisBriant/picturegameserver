@@ -398,11 +398,16 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 client_id = cli
                 #Notify room
                 print('Here is the client ID ',client_id)
-                client_room = self.get_from_store(client_id)['room']
-                if client_room in self.rooms:
-                    self.exit_room(client_id,client_room)
+
+                client = self.get_from_store(client_id)
+                #Exit room if still in there
+                if client['room']:
+                    client_room = self.get_from_store(client['room'])
+                    if client_room in self.rooms:
+                        self.exit_room(client_id,client_room)
                 del self.clients[cli]
                 self.remove_from_store(cli)
+
 
         #For now (for testing purposes destroy all the rooms)
         #Timer will be used to closed rooms when implemented
@@ -495,39 +500,57 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 print(e)
 
     def exit_room(self,client_id,room_name):
+        destroy_game_room = False
         print('Let me out of here!', room_name)
         room = self.get_from_store(room_name)
         client = self.get_from_store(client_id)
         if client_id in room['members']:
             #Get the game in progress
             game_id = 'game' + room['owner']
-            game = self.get_from_store(game_id)
-            print('THE GAME', game)
-            #Remove hand
-            del game['hands'][client_id]
-            #Remove tricks
-            game['trick'] = [trick for trick in game['trick'] if trick['player'] != client_id]
-            #Remove remaining players
-            game['remaining_players'] = [remain for remain in game['remaining_players'] if remain != client_id]
-            send_payload = {
-                'type' : 'room_exit',
-                'client': { 'id':client_id, 'name':client['name']},
-                'name' : room_name,
-                'members' : [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
-            }
-            print('send_payload', send_payload)
-            self.send_room(room,send_payload)
-            #Now remove the member
-            room['members'].remove(client_id)
-            self.store_object(game_id,game)
-            self.store_object(room_name,room)
+            try:
+                game = self.get_from_store(game_id)
+                #Easy way out - cancel the game for all the other players
+                send_payload = {
+                    'type' : 'game_exit',
+                    'client': { 'id':client_id, 'name':client['name']},
+                    'name' : room_name,
+                    'members' : [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
+                }
+                self.send_room(room,send_payload)
+                print("Tried send room")
+                destroy_game_room = True
+                self.destroy_room_and_game(room_name,game_id,room)
+            except Exception as e:
+                print(e)
+                send_payload = {
+                    'type' : 'room_exit',
+                    'client': { 'id':client_id, 'name':client['name']},
+                    'name' : room_name,
+                    'members' : [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
+                }
+                print('send_payload', send_payload)
+                self.send_room(room,send_payload)
+                #Now remove the member
+                room['members'].remove(client_id)
+                self.store_object(room_name,room)
         else:
             send_payload = {
                 'type' : 'room_exit_nonmember',
             }
             self.clients[client_id].sendMessage(json.dumps(send_payload).encode())
-        client['room'] = None
-        self.store_object(client_id,client)
+        if not destroy_game_room:
+            client['room'] = None
+            self.store_object(client_id,client)
+
+    def destroy_room_and_game(self,room_name,game_id,room):
+        self.remove_from_store(room_name)
+        self.remove_from_store(game_id)
+        for member in room['members']:
+            client = self.get_from_store(member)
+            client['room'] = None
+            room['members'].remove(member)
+            self.store_object(member,client)
+
 
     def close_room(self,room_name):
         print('Closing Room: ', room_name)

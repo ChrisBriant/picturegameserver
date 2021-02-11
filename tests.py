@@ -327,7 +327,7 @@ def test_three_player_knockout():
     handles.append(driver.window_handles[1])
     handles.append(driver.window_handles[2])
 
-    for i in range(0,8):
+    for i in range(0,1):
         switch_toactive(handles)
         cards = get_cards()
         if cards:
