@@ -397,11 +397,11 @@ class BroadcastServerFactory(WebSocketServerFactory):
             if client == self.clients[cli]:
                 client_id = cli
                 #Notify room
-                print('Here is the client ID ',client_id)
-
+                print('CLIENT ID IS', client_id)
                 client = self.get_from_store(client_id)
                 #Exit room if still in there
-                if client['room']:
+                print("THE CLIENT SHOULD NOT HAVE A ROOM", client['room'])
+                if client['room'] != '':
                     client_room = self.get_from_store(client['room'])
                     if client_room in self.rooms:
                         self.exit_room(client_id,client_room)
@@ -538,16 +538,16 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'type' : 'room_exit_nonmember',
             }
             self.clients[client_id].sendMessage(json.dumps(send_payload).encode())
-        if not destroy_game_room:
-            client['room'] = None
-            self.store_object(client_id,client)
+        #if not destroy_game_room:
+        client['room'] = ''
+        self.store_object(client_id,client)
 
     def destroy_room_and_game(self,room_name,game_id,room):
         self.remove_from_store(room_name)
         self.remove_from_store(game_id)
         for member in room['members']:
             client = self.get_from_store(member)
-            client['room'] = None
+            client['room'] = ''
             room['members'].remove(member)
             self.store_object(member,client)
 

@@ -157,6 +157,33 @@ def test_startgame():
 
     ## TODO: Start the game and then get the cards and click
 
+def test_setuproom():
+    #Open four sessions
+    for i in range(0,3):
+        driver.execute_script('window.open("");')
+        driver.get('http://localhost:3000/')
+        letters = string.ascii_letters
+        name = ''.join(random.choice(letters) for i in range(6))
+        driver.find_element_by_id("name").send_keys(name)
+        driver.find_element_by_id("sendname").click()
+        driver.switch_to_window(driver.window_handles[-1])
+    driver.get('http://localhost:3000/')
+    letters = string.ascii_letters
+    name = ''.join(random.choice(letters) for i in range(6))
+    driver.find_element_by_id("name").send_keys(name)
+    driver.find_element_by_id("sendname").click()
+
+    #Create two rooms
+    driver.switch_to_window(driver.window_handles[0])
+    driver.find_element_by_id("room-name").send_keys('Room A')
+    driver.find_element_by_id("sendroom").click()
+
+    #First two windows open room a
+    driver.switch_to_window(driver.window_handles[0])
+    driver.find_element_by_id("Room A").click()
+    #Second person joins
+    driver.switch_to_window(driver.window_handles[1])
+    driver.find_element_by_id("Room A").click()
 
 def test_play_round():
     test_startgame()
@@ -327,7 +354,7 @@ def test_three_player_knockout():
     handles.append(driver.window_handles[1])
     handles.append(driver.window_handles[2])
 
-    for i in range(0,1):
+    for i in range(0,18):
         switch_toactive(handles)
         cards = get_cards()
         if cards:
@@ -376,6 +403,9 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'test_startgame':
         print(str(sys.argv[1]))
         test_startgame()
+    elif sys.argv[1] == 'test_setuproom':
+        print(str(sys.argv[1]))
+        test_setuproom()
     elif sys.argv[1] == 'test_round_winner':
         test_round_winner()
     elif sys.argv[1] == 'test_play_round':
