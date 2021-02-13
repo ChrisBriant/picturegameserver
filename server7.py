@@ -194,6 +194,13 @@ class BroadcastServerFactory(WebSocketServerFactory):
         #print('This is from redis',dict_obj)
         return dict_obj
 
+    def is_in_store(self,id):
+        obj = R.get(id)
+        if obj:
+            return True
+        else:
+            return False
+
     def remove_from_store(self,id):
         R.delete(id)
 
@@ -419,7 +426,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 client = self.get_from_store(client_id)
                 #Exit room if still in there
                 print("THE CLIENT SHOULD NOT HAVE A ROOM", client['room'])
-                if client['room'] != '':
+                if client['room'] != '' and self.is_in_store(client['room']):
                     #Try removing the room here
                     client_room = self.get_from_store(client['room'])
                     print("There should be rooms", self.rooms)
@@ -428,6 +435,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                         self.exit_room(client_id,client['room'])
                 del self.clients[cli]
                 self.remove_from_store(cli)
+                self.send_room_list()
 
 
         #For now (for testing purposes destroy all the rooms)
@@ -522,16 +530,15 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
     def exit_room(self,client_id,room_name):
         destroy_game_room = False
-        print('Let me out of here!', room_name)
         room = self.get_from_store(room_name)
+        print('Let me out of here!', room)
         client = self.get_from_store(client_id)
+        #If a game is in progress
         if client_id in room['members']:
-            #Get the game in progress
-            game_id = 'game' + room['owner']
-            try:
-                game = self.get_from_store(game_id)
+            if room['game'] != '':
+                #Destroy the game and room send room exit payload
+                self.remove_from_store(room['game'])
                 self.remove_from_store(room_name)
-                #Easy way out - cancel the game for all the other players
                 send_payload = {
                     'type' : 'game_exit',
                     'client': { 'id':client_id, 'name':client['name']},
@@ -540,15 +547,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     'rooms': json.dumps(self.get_rooms_from_store())
                 }
                 self.send_room(room,send_payload)
-                print("Tried send room")
-                destroy_game_room = True
-                self.destroy_room_and_game(room_name,game_id,room)
-                #Now remove the member
-                #room['members'].remove(client_id)
-                #self.store_object(room_name,room)
-            except Exception as e:
-                print(e)
-                #self.remove_from_store(room_name)
+                self.rooms.remove(room_name)
+            else:
                 send_payload = {
                     'type' : 'room_exit',
                     'client': { 'id':client_id, 'name':client['name']},
@@ -558,34 +558,30 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 }
                 print('send_payload', send_payload)
                 self.send_room(room,send_payload)
-                #Now remove the member
-                room['members'].remove(client_id)
-                self.store_object(room_name,room)
         else:
             send_payload = {
                 'type' : 'room_exit_nonmember',
             }
             self.clients[client_id].sendMessage(json.dumps(send_payload).encode())
-        #if not destroy_game_room:
+        client = self.get_from_store(client_id)
         client['room'] = ''
         self.store_object(client_id,client)
-        self.send_room_list()
 
 
-    def destroy_room_and_game(self,room_name,game_id,room):
-        print('DESTRYING THE ROOM', game_id)
-        #self.remove_from_store(room_name)
-        self.remove_from_store(game_id)
-        for member in room['members']:
-            client = self.get_from_store(member)
-            client['room'] = ''
-            self.store_object(member,client)
-            send_payload = {
-                'type' : 'destroy_room',
-                'rooms': json.dumps(self.get_rooms_from_store())
-            }
-            self.clients[member].sendMessage(json.dumps(send_payload).encode())
-            room['members'].remove(member)
+    # def destroy_room_and_game(self,room_name,game_id,room):
+    #     print('DESTRYING THE ROOM', game_id)
+    #     #self.remove_from_store(room_name)
+    #     self.remove_from_store(game_id)
+    #     for member in room['members']:
+    #         client = self.get_from_store(member)
+    #         client['room'] = ''
+    #         self.store_object(member,client)
+    #         send_payload = {
+    #             'type' : 'destroy_room',
+    #             'rooms': json.dumps(self.get_rooms_from_store())
+    #         }
+    #         self.clients[member].sendMessage(json.dumps(send_payload).encode())
+    #         room['members'].remove(member)
 
     def close_room(self,room_name):
         print('Closing Room: ', room_name)
