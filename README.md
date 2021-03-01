@@ -14,3 +14,4 @@ openssl x509 -req -days 365 -in server.csr -signkey server.key -sha256 -out serv
 
 # Convert the CRT to PEM format:
 openssl x509 -in server.crt -out server.pem -outform PEM
+# picturegameserver
