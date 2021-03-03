@@ -9,6 +9,8 @@ from autobahn.twisted.resource import WebSocketResource
 from resettimer import TimerReset
 from itertools import groupby
 
+from getrandomword import get_random_word
+
 #The timeout value in seconds to keep a room active
 ROOM_TIMEOUT_VALUE = 1200000
 R = redis.Redis()
@@ -78,6 +80,8 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                     }
                     room = self.factory.rooms[received_data['name']]
                     self.factory.send_room(room,send_payload)
+            elif received_data['type'] == 'picture':
+                self.factory.add_picture(received_data['client_id'],received_data['game_id'],received_data['picture'])
             # elif received_data['type'] == 'play_card':
             #     self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
             # elif received_data['type'] == 'pick_trump':
@@ -343,22 +347,48 @@ class BroadcastServerFactory(WebSocketServerFactory):
             self.games.append(game_id)
             #Get room member ids
             ids = [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
+            rec,level,random_word = get_random_word(1)[0]
             game = {
                 'startplayer': random.choice(ids),
-                'remaining_players':room['members'],
-                'canvas' : {},
+                'players':room['members'],
+                'canvas' : [],
+                'word' : random_word
             }
             print(game)
             #Send data to client
             payload = {
                 'type': 'game_start',
                 'startplayer': game['startplayer'],
+                'game_id': game_id
             }
             self.send_room(room,payload)
             self.store_object(game_id,game)
             #Update room
             self.store_object(room_name,room)
             self.send_room_list()
+            #Send the random word to the other playes
+            #others = [p['id'] for p in ids if p['id'] != game['startplayer']['id']]
+            payload = {
+                'type': 'word',
+                'word': game['word']
+            }
+            try:
+                self.clients[game['startplayer']['id']].sendMessage(json.dumps(payload).encode('utf-8'))
+            except Exception as e:
+                print(e)
+
+    def add_picture(self,client_id,game_id,picture):
+        game = self.get_from_store(game_id)
+        game['canvas'] = picture
+        print('START PLAYER', game['players'])
+        others = [p for p in game['players'] if p != client_id]
+        for player in others:
+            payload = {
+                'type' : 'picture',
+                'picture' : game['canvas']
+            }
+            self.clients[player].sendMessage(json.dumps(payload).encode())
+        self.store_object(game_id,game)
 
     def close_room(self,room_name):
         print('Closing Room: ', room_name)
