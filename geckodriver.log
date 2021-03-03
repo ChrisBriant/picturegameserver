@@ -17729,3 +17729,187 @@ TimedPromise/<@chrome://marionette/content/sync.js:235:19
 TimedPromise@chrome://marionette/content/sync.js:220:10
 interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
 webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+console.error: services.settings: 
+  security-state/onecrl Signature failed  TypeError: NetworkError when attempting to fetch resource.
+console.error: services.settings: 
+  Message: TypeError: NetworkError when attempting to fetch resource.
+  Stack:
+    _validateCollectionSignature@resource://services-settings/RemoteSettingsClient.jsm:830:36
+_importChanges@resource://services-settings/RemoteSettingsClient.jsm:928:20
+
+console.warn: services.settings: main/fxmonitor-breaches sync interrupted by shutdown
+console.warn: services.settings: main/search-config sync interrupted by shutdown
+console.warn: services.settings: main/search-telemetry sync interrupted by shutdown
+1614753982014	Marionette	INFO	Stopped listening on port 37649
+1614754924568	geckodriver	INFO	Listening on 127.0.0.1:47877
+1614754925588	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile7jM57w"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614754930211	Marionette	INFO	Listening on port 37665
+1614754930260	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614754930303	Marionette	ERROR	[18] No reply from Marionette:Register
+1614754930452	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614754931811	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614754932075	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614754932915	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614754933196	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614754934008	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+JavaScript error: http://localhost:5000/build/bundle.js, line 6347: TypeError: uiStoreActions.recievePicture is not a function
+console.error: (new Error("Connection closed, pending request to server0.conn0.watcher4, type watchResources failed\n\nRequest stack:\nrequest@resource://devtools/shared/protocol/Front.js:288:14\ngenerateRequestMethods/</frontProto[name]@resource://devtools/shared/protocol/Front/FrontClassWithSpec.js:46:19\n_startListening@resource://devtools/shared/resources/resource-watcher.js:674:31\nwatchResources@resource://devtools/shared/resources/resource-watcher.js:143:20\n", "resource://devtools/shared/protocol/Front.js", 99))
+1614754994022	Marionette	INFO	Stopped listening on port 37665
+1614754997156	geckodriver	INFO	Listening on 127.0.0.1:39349
+1614754997165	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileVMQ2yB"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614755001689	Marionette	INFO	Listening on port 35363
+1614755001815	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614755001866	Marionette	ERROR	[15] No reply from Marionette:Register
+1614755002020	Marionette	ERROR	[2147483649] No reply from Marionette:Register
+1614755003437	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755003715	Marionette	ERROR	[2147483650] No reply from Marionette:Register
+1614755004514	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755004784	Marionette	ERROR	[2147483651] No reply from Marionette:Register
+1614755005593	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+JavaScript error: http://localhost:5000/build/bundle.js, line 6347: ReferenceError: picStoreActions is not defined
+1614755055478	Marionette	INFO	Stopped listening on port 35363
+1614755058538	geckodriver	INFO	Listening on 127.0.0.1:33285
+1614755059558	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileYny0q1"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614755063994	Marionette	INFO	Listening on port 40755
+1614755064099	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614755064141	Marionette	ERROR	[18] No reply from Marionette:Register
+1614755064261	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614755065706	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755065970	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614755066791	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755067066	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614755067915	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+console.error: "Error while calling actor 'stylesheet's method 'getMediaRules'" "can't access dead object"
+console.error: "get ownerNode@resource://devtools/server/actors/style-sheet.js:192:5\ngetCSSRules@resource://devtools/server/actors/style-sheet.js:302:9\n_getMediaRules@resource://devtools/server/actors/style-sheet.js:438:17\ngetMediaRules@resource://devtools/server/actors/style-sheet.js:428:17\nhandler@resource://devtools/shared/protocol/Actor.js:172:37\nonPacket@resource://devtools/server/devtools-server-connection.js:379:58\nreceiveMessage@resource://devtools/shared/transport/child-transport.js:68:16\n"
+console.error: "Error while calling actor 'stylesheet's method 'getMediaRules'" "can't access dead object"
+console.error: "get ownerNode@resource://devtools/server/actors/style-sheet.js:192:5\ngetCSSRules@resource://devtools/server/actors/style-sheet.js:302:9\n_getMediaRules@resource://devtools/server/actors/style-sheet.js:438:17\ngetMediaRules@resource://devtools/server/actors/style-sheet.js:428:17\nhandler@resource://devtools/shared/protocol/Actor.js:172:37\nonPacket@resource://devtools/server/devtools-server-connection.js:379:58\nreceiveMessage@resource://devtools/shared/transport/child-transport.js:68:16\n"
+console.error: "Error while calling actor 'stylesheet's method 'getMediaRules'" "can't access dead object"
+console.error: "get ownerNode@resource://devtools/server/actors/style-sheet.js:192:5\ngetCSSRules@resource://devtools/server/actors/style-sheet.js:302:9\n_getMediaRules@resource://devtools/server/actors/style-sheet.js:438:17\ngetMediaRules@resource://devtools/server/actors/style-sheet.js:428:17\nhandler@resource://devtools/shared/protocol/Actor.js:172:37\nonPacket@resource://devtools/server/devtools-server-connection.js:379:58\nreceiveMessage@resource://devtools/shared/transport/child-transport.js:68:16\n"
+console.warn: "fetching media rules failed" (new Error("Protocol error (TypeError): can't access dead object from: server0.conn1.child3/stylesheet337 (resource://devtools/server/actors/style-sheet.js:192:5)", "resource://devtools/shared/protocol/Front.js", 361))
+console.warn: "fetching media rules failed" (new Error("Protocol error (TypeError): can't access dead object from: server0.conn1.child3/stylesheet338 (resource://devtools/server/actors/style-sheet.js:192:5)", "resource://devtools/shared/protocol/Front.js", 361))
+console.warn: "fetching media rules failed" (new Error("Protocol error (TypeError): can't access dead object from: server0.conn1.child3/stylesheet339 (resource://devtools/server/actors/style-sheet.js:192:5)", "resource://devtools/shared/protocol/Front.js", 361))
+1614755137792	Marionette	INFO	Stopped listening on port 40755
+1614755140841	geckodriver	INFO	Listening on 127.0.0.1:47879
+1614755141862	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofilet90PJ0"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614755146565	Marionette	INFO	Listening on port 43725
+1614755146669	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614755146699	Marionette	ERROR	[18] No reply from Marionette:Register
+1614755146815	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614755148295	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755148577	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614755149391	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755149665	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614755150504	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+JavaScript error: http://localhost:5000/build/bundle.js, line 4474: TypeError: canvas is undefined
+1614755376937	Marionette	INFO	Stopped listening on port 43725
+1614755379882	geckodriver	INFO	Listening on 127.0.0.1:57827
+1614755380904	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileItRTKd"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614755385712	Marionette	INFO	Listening on port 41409
+1614755385813	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614755385849	Marionette	ERROR	[18] No reply from Marionette:Register
+1614755386029	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614755387442	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755387724	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614755388570	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755388854	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614755389684	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+JavaScript error: http://localhost:5000/build/bundle.js, line 4474: TypeError: canvas is undefined
+1614755491865	Marionette	INFO	Stopped listening on port 41409
+1614755495226	geckodriver	INFO	Listening on 127.0.0.1:48441
+1614755496246	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileNAduE5"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614755500782	Marionette	INFO	Listening on port 37403
+1614755500867	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614755500912	Marionette	ERROR	[15] No reply from Marionette:Register
+1614755501041	Marionette	ERROR	[2147483649] No reply from Marionette:Register
+1614755502670	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755502944	Marionette	ERROR	[2147483650] No reply from Marionette:Register
+1614755503783	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614755504067	Marionette	ERROR	[2147483651] No reply from Marionette:Register
+1614755504887	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+JavaScript error: resource://devtools/client/inspector/flexbox/flexbox.js, line 55: TypeError: this.inspector is null
+JavaScript error: resource://devtools/client/inspector/grids/grid-inspector.js, line 104: TypeError: this.inspector is null
+1614755672323	Marionette	INFO	Stopped listening on port 37403
