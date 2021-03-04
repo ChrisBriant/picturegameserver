@@ -82,6 +82,8 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                     self.factory.send_room(room,send_payload)
             elif received_data['type'] == 'picture':
                 self.factory.add_picture(received_data['client_id'],received_data['game_id'],received_data['picture'])
+            elif received_data['type'] == 'guess':
+                self.factory.process_guess(received_data['client_id'],received_data['game_id'],received_data['guess'])
             # elif received_data['type'] == 'play_card':
             #     self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
             # elif received_data['type'] == 'pick_trump':
@@ -352,7 +354,9 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'startplayer': random.choice(ids),
                 'players':room['members'],
                 'canvas' : [],
-                'word' : random_word
+                'word' : random_word,
+                'room_name' : room_name,
+                'guesses' : []
             }
             print(game)
             #Send data to client
@@ -389,6 +393,21 @@ class BroadcastServerFactory(WebSocketServerFactory):
             }
             self.clients[player].sendMessage(json.dumps(payload).encode())
         self.store_object(game_id,game)
+
+    def process_guess(self,client_id,game_id,guess):
+        client_obj = self.get_from_store(client_id)
+        game = self.get_from_store(game_id)
+        room = self.get_from_store(game['room_name'])
+        #ADD GUESS TO THE LIST AND CHECK AGAINST WORD
+        self.store_object(game_id,game)
+        payload = {
+            'type' : 'guess',
+            'guess' : guess,
+            'cient_id' : client_id,
+            'client_name':client_obj['name'],
+            'correct' : False
+        }
+        self.send_room(room,payload)
 
     def close_room(self,room_name):
         print('Closing Room: ', room_name)
