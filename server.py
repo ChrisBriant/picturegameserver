@@ -8,6 +8,7 @@ from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerPr
 from autobahn.twisted.resource import WebSocketResource
 from resettimer import TimerReset
 from itertools import groupby
+from difflib import SequenceMatcher
 
 from getrandomword import get_random_word
 
@@ -398,14 +399,30 @@ class BroadcastServerFactory(WebSocketServerFactory):
         client_obj = self.get_from_store(client_id)
         game = self.get_from_store(game_id)
         room = self.get_from_store(game['room_name'])
+        #Determine guessed correct
+        matchscore = SequenceMatcher(None, guess, game['word']).ratio()
+        if matchscore > 0.7:
+            #Guess correct
+            guess_correct = True
+            guess_correct_store = 'true'
+        else:
+            guess_correct = False
+            guess_correct_store = 'false'
         #ADD GUESS TO THE LIST AND CHECK AGAINST WORD
+        new_guess = {
+            'guess' : guess,
+            'cient_id' : client_id,
+            'client_name':client_obj['name'],
+            'correct' : guess_correct_store
+        }
+        game['guesses'].append(new_guess)
         self.store_object(game_id,game)
         payload = {
             'type' : 'guess',
             'guess' : guess,
             'cient_id' : client_id,
             'client_name':client_obj['name'],
-            'correct' : False
+            'correct' : guess_correct
         }
         self.send_room(room,payload)
 
