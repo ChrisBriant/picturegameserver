@@ -85,6 +85,8 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                 self.factory.add_picture(received_data['client_id'],received_data['game_id'],received_data['picture'])
             elif received_data['type'] == 'guess':
                 self.factory.process_guess(received_data['client_id'],received_data['game_id'],received_data['guess'])
+            elif received_data['type'] == 'next_round':
+                self.factory.start_new_round(received_data['game_id'])
             # elif received_data['type'] == 'play_card':
             #     self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
             # elif received_data['type'] == 'pick_trump':
@@ -188,6 +190,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 self.clients[cid]['client'].sendMessage(json.dumps(payload).encode())
             except Exception as e:
                 print(e)
+
 
     #The connection is closed tidy up
     def unregister(self, client):
@@ -354,6 +357,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
             game = {
                 'startplayer': random.choice(ids),
                 'players':room['members'],
+                'remaining_players': room['members'],
                 'canvas' : [],
                 'word' : random_word,
                 'room_name' : room_name,
@@ -405,6 +409,9 @@ class BroadcastServerFactory(WebSocketServerFactory):
             #Guess correct
             guess_correct = True
             guess_correct_store = 'true'
+            #remove the winner
+            #THIS IS CAUSING A PROBLEM AS EVALUATES TO NULL
+            game['remaining_players'] =  game['remaining_players'].remove(client_id)
         else:
             guess_correct = False
             guess_correct_store = 'false'
@@ -425,6 +432,26 @@ class BroadcastServerFactory(WebSocketServerFactory):
             'correct' : guess_correct
         }
         self.send_room(room,payload)
+
+
+    def start_new_round(self,game_id):
+        print('NEW ROUND', game_id)
+        game = self.get_from_store(str(game_id))
+        rec,level,random_word = get_random_word(1)[0]
+
+        room = self.get_from_store(game['room_name'])
+        ids = [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in game['remaining_players']]
+        #Set game variables
+        game['startplayer'] = random.choice(ids)
+        game['guesses'] = []
+        game['word'] = random_word
+        payload = {
+            'type': 'new_round',
+            'startplayer': game['startplayer'],
+            'game_id': game_id
+        }
+        self.send_room(room,payload)
+        self.store_object(game_id,game)
 
     def close_room(self,room_name):
         print('Closing Room: ', room_name)
