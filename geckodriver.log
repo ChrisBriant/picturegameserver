@@ -18910,3 +18910,250 @@ TimedPromise/<@chrome://marionette/content/sync.js:235:19
 TimedPromise@chrome://marionette/content/sync.js:220:10
 interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
 webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969136854	Marionette	INFO	Stopped listening on port 37167
+1614969276483	geckodriver	INFO	Listening on 127.0.0.1:34379
+1614969277496	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileW3yj2V"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614969281725	Marionette	INFO	Listening on port 36153
+1614969281841	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614969281874	Marionette	ERROR	[18] No reply from Marionette:Register
+1614969281980	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614969283369	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969283656	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614969284478	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969284746	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614969285574	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969400763	Marionette	INFO	Stopped listening on port 36153
+1614969403041	geckodriver	INFO	Listening on 127.0.0.1:42319
+1614969404057	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileLHekq9"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614969408295	Marionette	INFO	Listening on port 40971
+1614969408364	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614969408395	Marionette	ERROR	[18] No reply from Marionette:Register
+1614969408513	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614969409828	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969410061	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614969410888	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969411151	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614969411973	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969470991	Marionette	INFO	Stopped listening on port 40971
+1614969473527	geckodriver	INFO	Listening on 127.0.0.1:56599
+1614969474539	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofilem5HZzg"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614969478967	Marionette	INFO	Listening on port 44409
+1614969479071	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614969479102	Marionette	ERROR	[15] No reply from Marionette:Register
+1614969479216	Marionette	ERROR	[2147483649] No reply from Marionette:Register
+1614969480657	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969480952	Marionette	ERROR	[2147483650] No reply from Marionette:Register
+1614969481751	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969482031	Marionette	ERROR	[2147483651] No reply from Marionette:Register
+1614969482838	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+JavaScript error: resource://devtools/client/jsonview/Sniffer.jsm, line 53: NS_ERROR_NOT_AVAILABLE: Component returned failure code: 0x80040111 (NS_ERROR_NOT_AVAILABLE) [nsIChannel.contentType]
+JavaScript error: resource://devtools/client/jsonview/Sniffer.jsm, line 53: NS_ERROR_NOT_AVAILABLE: Component returned failure code: 0x80040111 (NS_ERROR_NOT_AVAILABLE) [nsIChannel.contentType]
+JavaScript error: resource://devtools/client/jsonview/Sniffer.jsm, line 53: NS_ERROR_NOT_AVAILABLE: Component returned failure code: 0x80040111 (NS_ERROR_NOT_AVAILABLE) [nsIChannel.contentType]
+JavaScript error: resource://devtools/shared/protocol/Front.js, line 99: Error: Connection closed, pending request to server0.conn0.child3/obj215, type release failed
+
+Request stack:
+request@resource://devtools/shared/protocol/Front.js:288:14
+generateRequestMethods/</frontProto[name]@resource://devtools/shared/protocol/Front/FrontClassWithSpec.js:46:19
+generateRequestMethods/</frontProto[name]@resource://devtools/shared/protocol/Front/FrontClassWithSpec.js:62:19
+enableActorReleaser/</</releaseActorsEnhancer/<@resource://devtools/client/webconsole/enhancers/actor-releaser.js:46:33
+releaseActorsEnhancer@resource://devtools/client/webconsole/enhancers/actor-releaser.js:36:40
+batchingReducer@resource://devtools/client/webconsole/enhancers/batching.js:21:18
+netProviderEnhancer@resource://devtools/client/webconsole/enhancers/net-provider.js:42:31
+messagesCacheClearingEnhancer@resource://devtools/client/webconsole/enhancers/message-cache-clearing.js:17:15
+ensureErrorReportingEnhancer@resource://devtools/client/webconsole/enhancers/css-error-reporting.js:21:15
+dispatch@resource://devtools/client/shared/vendor/redux.js:256:22
+eventTelemetryMiddleware/</<@resource://devtools/client/webconsole/middleware/event-telemetry.js:25:21
+historyPersistenceMiddleware/</<@resource://devtools/client/webconsole/middleware/history-persistence.js:37:21
+thunk/</</<@resource://devtools/client/shared/redux/middleware/thunk.js:18:11
+ignore/</<@resource://devtools/client/shared/redux/middleware/ignore.js:31:12
+createPerformanceMarkerMiddleware/</</<@resource://devtools/client/shared/redux/middleware/performance-marker.js:50:28
+dispatchMessagesClear@resource://devtools/client/webconsole/webconsole-wrapper.js:160:11
+dispatchTabWillNavigate@resource://devtools/client/webconsole/webconsole-wrapper.js:243:12
+handleTabWillNavigate@resource://devtools/client/webconsole/webconsole-ui.js:678:18
+_onTabWillNavigate@resource://devtools/client/webconsole/webconsole-connection-proxy.js:216:23
+_emit@resource://devtools/shared/event-emitter.js:226:34
+emit@resource://devtools/shared/event-emitter.js:172:18
+emit@resource://devtools/shared/event-emitter.js:324:18
+_onTabNavigated@resource://devtools/client/fronts/targets/browsing-context.js:74:12
+_emit@resource://devtools/shared/event-emitter.js:226:34
+emit@resource://devtools/shared/event-emitter.js:172:18
+emit@resource://devtools/shared/event-emitter.js:324:18
+onPacket@resource://devtools/shared/protocol/Front.js:332:13
+onPacket@resource://devtools/client/devtools-client.js:489:13
+send/<@resource://devtools/shared/transport/local-transport.js:68:25
+exports.makeInfallible/<@resource://devtools/shared/ThreadSafeDevToolsUtils.js:103:22
+exports.makeInfallible/<@resource://devtools/shared/ThreadSafeDevToolsUtils.js:103:22
+
+1614969772095	Marionette	INFO	Stopped listening on port 44409
+1614969775785	geckodriver	INFO	Listening on 127.0.0.1:46479
+1614969776804	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofilewjyuoI"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614969781271	Marionette	INFO	Listening on port 33957
+1614969781387	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614969781419	Marionette	ERROR	[18] No reply from Marionette:Register
+1614969781529	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614969782881	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969783132	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614969783995	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969784272	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614969785135	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969978472	Marionette	INFO	Stopped listening on port 33957
+1614969981182	geckodriver	INFO	Listening on 127.0.0.1:44719
+1614969981191	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileW3qc57"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614969985535	Marionette	INFO	Listening on port 37575
+1614969985585	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614969985617	Marionette	ERROR	[18] No reply from Marionette:Register
+1614969985695	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614969986799	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969987064	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614969987960	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614969988245	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614969989040	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614970119198	Marionette	INFO	Stopped listening on port 37575
+1614970121053	geckodriver	INFO	Listening on 127.0.0.1:46043
+1614970122058	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile3rlQOP"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614970126512	Marionette	INFO	Listening on port 35411
+1614970126635	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614970126662	Marionette	ERROR	[18] No reply from Marionette:Register
+1614970126782	Marionette	ERROR	[4294967297] No reply from Marionette:Register
+1614970128183	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614970128472	Marionette	ERROR	[4294967298] No reply from Marionette:Register
+1614970129294	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614970129573	Marionette	ERROR	[4294967299] No reply from Marionette:Register
+1614970130407	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+JavaScript error: http://localhost:5000/build/bundle.js, line 6310: ReferenceError: dispatch is not defined
+1614970228145	Marionette	INFO	Stopped listening on port 35411
+1614970230858	geckodriver	INFO	Listening on 127.0.0.1:41735
+1614970231870	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileG2uY2N"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614970236160	Marionette	INFO	Listening on port 35965
+1614970236257	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614970236283	Marionette	ERROR	[15] No reply from Marionette:Register
+1614970236392	Marionette	ERROR	[2147483649] No reply from Marionette:Register
+1614970237715	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614970237989	Marionette	ERROR	[2147483650] No reply from Marionette:Register
+1614970238821	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614970239094	Marionette	ERROR	[2147483651] No reply from Marionette:Register
+1614970239912	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614970407319	Marionette	INFO	Stopped listening on port 35965
+1614970410028	geckodriver	INFO	Listening on 127.0.0.1:39677
+1614970411039	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileqfkDq1"
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1614970415412	Marionette	INFO	Listening on port 45671
+1614970415485	Marionette	WARN	TLS certificate errors will be ignored for this session
+1614970415522	Marionette	ERROR	[15] No reply from Marionette:Register
+1614970415618	Marionette	ERROR	[2147483649] No reply from Marionette:Register
+1614970416905	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614970417171	Marionette	ERROR	[2147483650] No reply from Marionette:Register
+1614970418006	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31
+1614970418257	Marionette	ERROR	[2147483651] No reply from Marionette:Register
+1614970419108	Marionette	WARN	TimedPromise timed out after 500 ms: stacktrace:
+TimedPromise/<@chrome://marionette/content/sync.js:235:19
+TimedPromise@chrome://marionette/content/sync.js:220:10
+interaction.flushEventLoop@chrome://marionette/content/interaction.js:418:10
+webdriverClickElement@chrome://marionette/content/interaction.js:179:31

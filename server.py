@@ -411,7 +411,11 @@ class BroadcastServerFactory(WebSocketServerFactory):
             guess_correct_store = 'true'
             #remove the winner
             #THIS IS CAUSING A PROBLEM AS EVALUATES TO NULL
-            game['remaining_players'] =  game['remaining_players'].remove(client_id)
+            game['remaining_players'] =  [memb for memb in game['remaining_players'] if memb !=  game['startplayer']['id']]
+            print('Here are the others', game['remaining_players'])
+            if len(game['remaining_players']) <= 0:
+                #Trigger end game
+                pass
         else:
             guess_correct = False
             guess_correct_store = 'false'
@@ -451,7 +455,15 @@ class BroadcastServerFactory(WebSocketServerFactory):
             'game_id': game_id
         }
         self.send_room(room,payload)
+        #Send the word
+        payload = {
+            'type': 'word',
+            'word': game['word']
+        }
+        self.clients[game['startplayer']['id']].sendMessage(json.dumps(payload).encode('utf-8'))
         self.store_object(game_id,game)
+
+
 
     def close_room(self,room_name):
         print('Closing Room: ', room_name)
