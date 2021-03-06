@@ -413,25 +413,30 @@ class BroadcastServerFactory(WebSocketServerFactory):
             #THIS IS CAUSING A PROBLEM AS EVALUATES TO NULL
             game['remaining_players'] =  [memb for memb in game['remaining_players'] if memb !=  game['startplayer']['id']]
             print('Here are the others', game['remaining_players'])
-            if len(game['remaining_players']) <= 0:
-                #Trigger end game
-                pass
         else:
             guess_correct = False
             guess_correct_store = 'false'
         #ADD GUESS TO THE LIST AND CHECK AGAINST WORD
         new_guess = {
             'guess' : guess,
-            'cient_id' : client_id,
+            'client_id' : client_id,
             'client_name':client_obj['name'],
             'correct' : guess_correct_store
         }
         game['guesses'].append(new_guess)
-        self.store_object(game_id,game)
+
+
+        if len(game['remaining_players']) <= 0:
+            #Trigger end game send a different type to be processed differently
+            type = 'game_over'
+            self.remove_from_store(game_id)
+        else:
+            type = 'guess'
+            self.store_object(game_id,game)
         payload = {
-            'type' : 'guess',
+            'type' : type,
             'guess' : guess,
-            'cient_id' : client_id,
+            'client_id' : client_id,
             'client_name':client_obj['name'],
             'correct' : guess_correct
         }
