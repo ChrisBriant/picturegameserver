@@ -87,6 +87,8 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                 self.factory.process_guess(received_data['client_id'],received_data['game_id'],received_data['guess'])
             elif received_data['type'] == 'next_round':
                 self.factory.start_new_round(received_data['game_id'])
+            elif received_data['type'] == 'destroy_room':
+                self.factory.destroy_room(received_data['client_id'])
             # elif received_data['type'] == 'play_card':
             #     self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
             # elif received_data['type'] == 'pick_trump':
@@ -126,6 +128,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
         return dict_obj
 
     def is_in_store(self,id):
+        print(id)
         obj = R.get(id)
         if obj:
             return True
@@ -133,7 +136,10 @@ class BroadcastServerFactory(WebSocketServerFactory):
             return False
 
     def remove_from_store(self,id):
-        R.delete(id)
+        try:
+            R.delete(id)
+        except Exception as e:
+            print('Not found',e)
 
     def get_clients_from_store(self):
         cli_list = []
@@ -485,6 +491,19 @@ class BroadcastServerFactory(WebSocketServerFactory):
             self.rooms.remove(room_name)
             del self.timers[room_name]
             self.send_room_list()
+
+
+    def destroy_room(self,client_id):
+        print(self.is_in_store(str(client_id)))
+        if self.is_in_store(str(client_id)):
+            print('DESTRYING ROOM')
+            #get room
+            client = self.get_from_store(client_id)
+            #destroy room
+            self.remove_from_store(client['room'])
+            self.send_room_list()
+
+
 
 
 if __name__ == "__main__":

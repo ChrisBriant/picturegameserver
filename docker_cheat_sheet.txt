@@ -1,0 +1,14 @@
+
+#Get inside the docker container and run commands
+sudo docker exec -it d4905506a6cb bash
+
+#REDIS
+
+#Open redis
+redis-cli
+
+#See all keys
+keys *
+
+#wipe all data
+flushall
