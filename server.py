@@ -89,6 +89,8 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                 self.factory.start_new_round(received_data['game_id'])
             elif received_data['type'] == 'destroy_room':
                 self.factory.destroy_room(received_data['client_id'])
+            elif received_data['type'] == 'giveup':
+                self.factory.giveup(received_data['client_id'],received_data['game_id'])
             # elif received_data['type'] == 'play_card':
             #     self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
             # elif received_data['type'] == 'pick_trump':
@@ -367,7 +369,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 'canvas' : [],
                 'word' : random_word,
                 'room_name' : room_name,
-                'guesses' : []
+                'guesses' : [],
+                'giveups' : []
             }
             print(game)
             #Send data to client
@@ -416,7 +419,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
             guess_correct = True
             guess_correct_store = 'true'
             #remove the winner
-            #THIS IS CAUSING A PROBLEM AS EVALUATES TO NULL
             game['remaining_players'] =  [memb for memb in game['remaining_players'] if memb !=  game['startplayer']['id']]
             print('Here are the others', game['remaining_players'])
         else:
@@ -449,6 +451,36 @@ class BroadcastServerFactory(WebSocketServerFactory):
         self.send_room(room,payload)
 
 
+    def giveup(self,client_id,game_id):
+        client_obj = self.get_from_store(client_id)
+        game = self.get_from_store(game_id)
+        room = self.get_from_store(game['room_name'])
+        #Determine guessed correct
+        game['giveups'].append(client_id)
+
+        if len(game['giveups']) == len(game['players'])-1:
+            #Last person to give up game
+            if len(game['remaining_players']) <= 1:
+                #Trigger end game condition if at end
+                type = 'game_over_from_give_up'
+                self.remove_from_store(game_id)
+            else:
+                #Remove start player as they have now won
+                game['remaining_players'] =  [memb for memb in game['remaining_players'] if memb !=  game['startplayer']['id']]
+                type = 'win_from_give_up'
+        else:
+            type = 'giveup'
+        payload = {
+            'type' : type,
+            'guess' : 'Player(s) gave up',
+            'client_id' : client_id,
+            'client_name':client_obj['name'],
+            #'correct' : guess_correct
+        }
+        self.send_room(room,payload)
+        self.store_object(game_id,game)
+
+
     def start_new_round(self,game_id):
         print('NEW ROUND', game_id)
         game = self.get_from_store(str(game_id))
@@ -460,6 +492,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
         game['startplayer'] = random.choice(ids)
         game['guesses'] = []
         game['word'] = random_word
+        game['giveups'] = []
         payload = {
             'type': 'new_round',
             'startplayer': game['startplayer'],
