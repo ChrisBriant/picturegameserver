@@ -1,9 +1,5 @@
+python3 tests.py test_set_name
 python3 tests.py test_rooms
-python3 tests.py test_room_privatemessage
-python3 tests.py test_create_room
-python3 tests.py test_joinandrejoin_room
 python3 tests.py test_startgame
-python3 tests.py test_end_game
-python3 tests.py test_play_round
-python3 tests.py test_tie_break_round
-python3 tests.py test_three_player_knockout
+python3 tests.py test_endgame
+python3 tests.py test_3_player

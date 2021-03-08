@@ -242,12 +242,15 @@ class BroadcastServerFactory(WebSocketServerFactory):
         self.store_object(client_id,client_obj)
 
     def create_room(self,client_id,room):
+        owner = self.get_from_store(client_id)
         if room not in self.rooms:
             self.rooms.append(room)
             room_obj = {
                 'owner' : client_id,
+                'owner_name' : owner['name'],
                 'name' : room,
                 'members' : [],
+                'user_names' : [],
                 'locked' : 'false',
                 'game' : ''
             }
@@ -286,6 +289,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
             if client_id not in room['members']:
                 room['members'].append(client_id)
+                #Add member names to different list to allow easier processing
+                room['user_names'].append(client['name'])
                 send_payload = {
                     'type' : 'room_entrance',
                     'client': { 'id':client_id, 'name':client['name']},
@@ -294,6 +299,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 }
                 self.send_room(room,send_payload)
                 self.store_object(room_name,room)
+                self.send_room_list()
         else:
             send_payload = {
                 'type' : 'room_occupied',

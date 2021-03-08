@@ -56,6 +56,37 @@ def test_startgame():
     driver.find_element_by_id("start-game").click()
 
 
+def test_3_player():
+    #Open four sessions
+    for i in range(0,2):
+        driver.execute_script('window.open("");')
+        driver.get('http://localhost:5000/')
+        letters = string.ascii_letters
+        name = ''.join(random.choice(letters) for i in range(6))
+        driver.find_element_by_id("name").send_keys(name)
+        driver.find_element_by_id("sendname").click()
+        driver.switch_to_window(driver.window_handles[-1])
+    driver.get('http://localhost:5000/')
+    letters = string.ascii_letters
+    name = ''.join(random.choice(letters) for i in range(6))
+    driver.find_element_by_id("name").send_keys(name)
+    driver.find_element_by_id("sendname").click()
+
+    #Create two rooms
+    driver.switch_to_window(driver.window_handles[0])
+    driver.find_element_by_id("room-name").send_keys('Room A')
+    driver.find_element_by_id("sendroom").click()
+    #First two windows open room a
+    driver.switch_to_window(driver.window_handles[0])
+    driver.find_element_by_id("Room A").click()
+    driver.switch_to_window(driver.window_handles[1])
+    driver.find_element_by_id("Room A").click()
+    driver.switch_to_window(driver.window_handles[2])
+    driver.find_element_by_id("Room A").click()
+    #Start the game
+    driver.switch_to_window(driver.window_handles[1])
+    driver.find_element_by_id("start-game").click()
+
 def test_endgame():
     #two player
     test_startgame()
@@ -312,6 +343,8 @@ if __name__ == '__main__':
         test_startgame()
     elif sys.argv[1] == 'test_endgame':
         test_endgame()
+    elif sys.argv[1] == 'test_3_player':
+        test_3_player()
     # elif sys.argv[1] == 'test_setuproom':
     #     print(str(sys.argv[1]))
     #     test_setuproom()
