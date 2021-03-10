@@ -201,28 +201,93 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
 
     #The connection is closed tidy up
-    def unregister(self, client):
-        #client_id = None
+    def unregister(self, client_obj):
+        game_removed = False
+        #Get the client ID
+        client_id = None
         all_clients = list(self.clients)
         for cli in all_clients:
-            if client == self.clients[cli]:
+            if client_obj == self.clients[cli]:
                 client_id = cli
-                #Notify room
-                print('CLIENT ID IS', client_id)
-                client = self.get_from_store(client_id)
-                #Exit room if still in there
-                print("THE CLIENT SHOULD NOT HAVE A ROOM", client['room'])
-                if client['room'] != '' and self.is_in_store(client['room']):
-                    #Try removing the room here
-                    client_room = self.get_from_store(client['room'])
-                    print("There should be rooms", self.rooms)
-                    if client['room'] in self.rooms:
-                        print("CALLING EXIT ROOM", self.rooms)
-                        self.exit_room(client_id,client['room'])
-                del self.clients[cli]
-                self.remove_from_store(cli)
+        client = self.get_from_store(client_id)
+        if client_id:
+            if client['room'] != '':
+                #Clear down the room
+                room = self.get_from_store(client['room'])
+                room['user_names'].remove(client['name'])
+                room['members'].remove(client_id)
+                #Change ownership might not be necessary
+
+                #Deal with game
+                if room['game'] != '':
+                    game = self.get_from_store(room['game'])
+                    #Remove game if no more players
+                    if len(room['members']) <= 0:
+                        game_removed = True
+                        self.remove_from_store(room['game'])
+                    else:
+                        #Set game attributes
+                        game['players'] = room['members']
+                        if client_id in game['remaining_players']:
+                            game['remaining_players'].remove(client_id)
+                        if client_id in game['giveups']:
+                            game['giveups'].remove('client_id')
+                        #Switch startplayer if required
+                        if game['startplayer']['id'] == client_id:
+                            if len(game['remaining_players']) > 0:
+                                ids = [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
+                                game['startplayer'] = random.choice(ids)
+                                print("I AM THE START PLAYER OF THE UNIVERSE", game['startplayer'], client_id)
+                                game['canvas'] = []
+                                game['guesses'] = []
+                                #Need to send an event here to say the start player is switching over
+                                payload = {
+                                    'type': 'word',
+                                    'word': game['word']
+                                }
+                                try:
+                                    self.clients[game['startplayer']['id']].sendMessage(json.dumps(payload).encode('utf-8'))
+                                except Exception as e:
+                                    print(e)
+                            else:
+                                #Destroy
+                                game_removed = True
+                                self.remove_from_store(game_id)
+                if not game_removed:
+                    self.store_object(room['game'],game)
+                self.store_object(client['room'],room)
+                #Delete the client
+                print(self.clients)
+                del self.clients[client_id]
+                self.remove_from_store(client_id)
                 self.send_room_list()
-        self.rooms = []
+
+
+
+
+
+
+        #client_id = None
+        # all_clients = list(self.clients)
+        # for cli in all_clients:
+        #     if client == self.clients[cli]:
+        #         client_id = cli
+        #         #Notify room
+        #         print('CLIENT ID IS', client_id)
+        #         client = self.get_from_store(client_id)
+        #         #Exit room if still in there
+        #         print("THE CLIENT SHOULD NOT HAVE A ROOM", client['room'])
+        #         if client['room'] != '' and self.is_in_store(client['room']):
+        #             #Try removing the room here
+        #             client_room = self.get_from_store(client['room'])
+        #             print("There should be rooms", self.rooms)
+        #             if client['room'] in self.rooms:
+        #                 print("CALLING EXIT ROOM", self.rooms)
+        #                 self.exit_room(client_id,client['room'])
+        #         del self.clients[cli]
+        #         self.remove_from_store(cli)
+        #         self.send_room_list()
+        # self.rooms = []
 
 
     def broadcast(self, msg):
