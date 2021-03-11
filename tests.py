@@ -73,8 +73,8 @@ def test_rooms_2():
     driver.find_element_by_id("room-name").send_keys('Room B')
     driver.find_element_by_id("sendroom").click()
 
-    driver.switch_to_window(driver.window_handles[0])
-    driver.find_element_by_id("Room A").click()
+    #driver.switch_to_window(driver.window_handles[0])
+    #driver.find_element_by_id("Room A").click()
 
 def test_startgame():
     test_rooms()
