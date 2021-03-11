@@ -13,7 +13,7 @@ from difflib import SequenceMatcher
 from getrandomword import get_random_word
 
 #The timeout value in seconds to keep a room active
-ROOM_TIMEOUT_VALUE = 1200000
+ROOM_TIMEOUT_VALUE = 10
 R = redis.Redis()
 
 class BroadcastServerProtocol(WebSocketServerProtocol):
@@ -203,6 +203,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
     #The connection is closed tidy up
     def unregister(self, client_obj):
         game_removed = False
+        remove_room = False
         #Get the client ID
         client_id = None
         all_clients = list(self.clients)
@@ -225,6 +226,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
                             game = self.get_from_store(room['game'])
                             #Remove game if no more players
                             if len(room['members']) <= 0:
+                                print("SET REMOVE ROOM")
+                                remove_room = True
                                 game_removed = True
                                 self.remove_from_store(room['game'])
                             else:
@@ -266,7 +269,13 @@ class BroadcastServerFactory(WebSocketServerFactory):
                             game_removed = True
                     if not game_removed:
                         self.store_object(room['game'],game)
-                    self.store_object(client['room'],room)
+                    if remove_room:
+                        print("REMOVING ROOM")
+                        print(client['room'])
+                        self.remove_from_store(client['room'])
+                        self.rooms.remove(client['room'])
+                    else:
+                        self.store_object(client['room'],room)
                     #Delete the client
                     print(self.clients)
                     del self.clients[client_id]
@@ -438,6 +447,9 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
     def start_game(self,room_name):
         print("STARTING GAME")
+        #Stop and Remove the timer
+        self.timers[room_name]['timer'].cancel()
+        del self.timers[room_name]
         room = self.get_from_store(room_name)
         if room['game'] == '':
             room['locked'] = 'true'

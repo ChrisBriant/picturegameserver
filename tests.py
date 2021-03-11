@@ -76,6 +76,16 @@ def test_rooms_2():
     #driver.switch_to_window(driver.window_handles[0])
     #driver.find_element_by_id("Room A").click()
 
+def test_room_timer():
+    #Create rooms and join one of them
+    test_rooms_2()
+    driver.switch_to_window(driver.window_handles[0])
+    driver.find_element_by_id("Room A").click()
+    driver.switch_to_window(driver.window_handles[1])
+    driver.find_element_by_id("Room A").click()
+    driver.switch_to_window(driver.window_handles[1])
+    driver.find_element_by_id("start-game").click()
+
 def test_startgame():
     test_rooms()
     driver.switch_to_window(driver.window_handles[1])
@@ -374,6 +384,8 @@ if __name__ == '__main__':
         test_endgame()
     elif sys.argv[1] == 'test_3_player':
         test_3_player()
+    elif sys.argv[1] == 'test_room_timer':
+        test_room_timer()
     # elif sys.argv[1] == 'test_setuproom':
     #     print(str(sys.argv[1]))
     #     test_setuproom()
