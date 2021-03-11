@@ -221,46 +221,49 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
                     #Deal with game
                     if room['game'] != '':
-                        game = self.get_from_store(room['game'])
-                        #Remove game if no more players
-                        if len(room['members']) <= 0:
-                            game_removed = True
-                            self.remove_from_store(room['game'])
+                        if self.is_in_store(room['game']):
+                            game = self.get_from_store(room['game'])
+                            #Remove game if no more players
+                            if len(room['members']) <= 0:
+                                game_removed = True
+                                self.remove_from_store(room['game'])
+                            else:
+                                #Set game attributes
+                                game['players'] = room['members']
+                                if client_id in game['remaining_players']:
+                                    game['remaining_players'].remove(client_id)
+                                if client_id in game['giveups']:
+                                    game['giveups'].remove('client_id')
+                                #Switch startplayer if required
+                                if game['startplayer']['id'] == client_id:
+                                    if len(game['remaining_players']) > 0:
+                                        ids = [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
+                                        game['startplayer'] = random.choice(ids)
+                                        print("I AM THE START PLAYER OF THE UNIVERSE", game['startplayer'], client_id)
+                                        game['canvas'] = []
+                                        game['guesses'] = []
+                                        #Need to send an event here to say the start player is switching over
+                                        payload = {
+                                            'type': 'word',
+                                            'word': game['word']
+                                        }
+                                        try:
+                                            self.clients[game['startplayer']['id']].sendMessage(json.dumps(payload).encode('utf-8'))
+                                        except Exception as e:
+                                            print(e)
+                                        #Send start game payload
+                                        payload = {
+                                            'type': 'game_start',
+                                            'startplayer': game['startplayer'],
+                                            'game_id': room['game']
+                                        }
+                                        self.send_room(room,payload)
+                                    else:
+                                        #Destroy
+                                        game_removed = True
+                                        self.remove_from_store(game_id)
                         else:
-                            #Set game attributes
-                            game['players'] = room['members']
-                            if client_id in game['remaining_players']:
-                                game['remaining_players'].remove(client_id)
-                            if client_id in game['giveups']:
-                                game['giveups'].remove('client_id')
-                            #Switch startplayer if required
-                            if game['startplayer']['id'] == client_id:
-                                if len(game['remaining_players']) > 0:
-                                    ids = [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
-                                    game['startplayer'] = random.choice(ids)
-                                    print("I AM THE START PLAYER OF THE UNIVERSE", game['startplayer'], client_id)
-                                    game['canvas'] = []
-                                    game['guesses'] = []
-                                    #Need to send an event here to say the start player is switching over
-                                    payload = {
-                                        'type': 'word',
-                                        'word': game['word']
-                                    }
-                                    try:
-                                        self.clients[game['startplayer']['id']].sendMessage(json.dumps(payload).encode('utf-8'))
-                                    except Exception as e:
-                                        print(e)
-                                    #Send start game payload
-                                    payload = {
-                                        'type': 'game_start',
-                                        'startplayer': game['startplayer'],
-                                        'game_id': room['game']
-                                    }
-                                    self.send_room(room,payload)
-                                else:
-                                    #Destroy
-                                    game_removed = True
-                                    self.remove_from_store(game_id)
+                            game_removed = True
                     if not game_removed:
                         self.store_object(room['game'],game)
                     self.store_object(client['room'],room)
@@ -271,7 +274,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
                     self.send_room_list()
                 else:
                     del self.clients[client_id]
-                    self.remove_from_store(client_id)            
+                    self.remove_from_store(client_id)
             else:
                 del self.clients[client_id]
                 self.remove_from_store(client_id)
