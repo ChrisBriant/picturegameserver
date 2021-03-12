@@ -13,7 +13,7 @@ from difflib import SequenceMatcher
 from getrandomword import get_random_word
 
 #The timeout value in seconds to keep a room active
-ROOM_TIMEOUT_VALUE = 10
+ROOM_TIMEOUT_VALUE = 500
 R = redis.Redis()
 
 class BroadcastServerProtocol(WebSocketServerProtocol):
@@ -225,11 +225,17 @@ class BroadcastServerFactory(WebSocketServerFactory):
                         if self.is_in_store(room['game']):
                             game = self.get_from_store(room['game'])
                             #Remove game if no more players
-                            if len(room['members']) <= 0:
+                            if len(room['members']) == 1:
                                 print("SET REMOVE ROOM")
                                 remove_room = True
                                 game_removed = True
                                 self.remove_from_store(room['game'])
+                                #Send payload to tell remaining player everyone else has left
+                                payload = {
+                                    'type' : 'everyone_quit',
+                                }
+                                print(room['members'][0])
+                                self.clients[room['members'][0]].sendMessage(json.dumps(payload).encode())
                             else:
                                 #Set game attributes
                                 game['players'] = room['members']
@@ -639,6 +645,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
 
 if __name__ == "__main__":
+    #Clear redis cache
+    R.flushdb()
     log.startLogging(sys.stdout)
     contextFactory = ssl.DefaultOpenSSLContextFactory('keys/server.key',
                                                           'keys/server.crt')
