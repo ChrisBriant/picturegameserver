@@ -1,0 +1,13 @@
+[Unit]
+Description=picserver startup script 
+After=network.target
+
+[Service]
+User=django
+Group=www-data
+ExecStart=/home/chris/Documents/python/environments/gameservertest/bin/python /home/chris/Documents/python/environments/gameservertest/bin/twistd -y /home/chris/Documents/python/picturegameserver/server.py
+WorkingDirectory=/home/chris/Documents/python/picturegameserver/
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
