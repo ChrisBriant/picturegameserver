@@ -95,7 +95,6 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
 
     def connectionLost(self, reason):
         print("Connection Lost", reason)
-        #WebSocketServerProtocol.connectionLost(self, reason)
         self.factory.unregister(self)
 
 
@@ -282,33 +281,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
                 del self.clients[client_id]
                 self.remove_from_store(client_id)
 
-
-
-
-
-        #client_id = None
-        # all_clients = list(self.clients)
-        # for cli in all_clients:
-        #     if client == self.clients[cli]:
-        #         client_id = cli
-        #         #Notify room
-        #         print('CLIENT ID IS', client_id)
-        #         client = self.get_from_store(client_id)
-        #         #Exit room if still in there
-        #         print("THE CLIENT SHOULD NOT HAVE A ROOM", client['room'])
-        #         if client['room'] != '' and self.is_in_store(client['room']):
-        #             #Try removing the room here
-        #             client_room = self.get_from_store(client['room'])
-        #             print("There should be rooms", self.rooms)
-        #             if client['room'] in self.rooms:
-        #                 print("CALLING EXIT ROOM", self.rooms)
-        #                 self.exit_room(client_id,client['room'])
-        #         del self.clients[cli]
-        #         self.remove_from_store(cli)
-        #         self.send_room_list()
-        # self.rooms = []
-
-
     def broadcast(self, msg):
         print("broadcasting message '{}' to {} clients ...".format(msg, len(self.clients)))
         cids = self.clients.keys()
@@ -486,7 +458,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
             self.store_object(room_name,room)
             self.send_room_list()
             #Send the random word to the other playes
-            #others = [p['id'] for p in ids if p['id'] != game['startplayer']['id']]
             payload = {
                 'type': 'word',
                 'word': game['word']
@@ -576,7 +547,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
             'guess' : 'Player(s) gave up',
             'client_id' : client_id,
             'client_name':client_obj['name'],
-            #'correct' : guess_correct
         }
         self.send_room(room,payload)
         self.store_object(game_id,game)
