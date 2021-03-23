@@ -96,17 +96,6 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
                 self.factory.destroy_room(received_data['client_id'])
             elif received_data['type'] == 'giveup':
                 self.factory.giveup(received_data['client_id'],received_data['game_id'])
-            # elif received_data['type'] == 'play_card':
-            #     self.factory.play_card(received_data['room_id'],received_data['card'],received_data['client_id'])
-            # elif received_data['type'] == 'pick_trump':
-            #     self.factory.pick_trump(received_data['room_id'],received_data['card'],received_data['client_id'])
-            # elif received_data['type'] == 'tie_breaker_choice':
-            #     self.factory.tie_break(received_data['room_id'],received_data['card'],received_data['client_id'],received_data['ties'],received_data['tie_break_id'])
-            # elif received_data['type'] == 'end_tie_break':
-            #     self.factory.tie_break_end(received_data['room_id'],received_data['client_id'],received_data['tie_break_id'])
-            #
-            #
-
 
 
     def connectionLost(self, reason):
@@ -138,7 +127,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
     def get_from_store(self,id):
         obj = R.get(id)
         dict_obj = ast.literal_eval(obj.decode('utf-8'))
-        #print('This is from redis',dict_obj)
         return dict_obj
 
     def is_in_store(self,id):
@@ -389,31 +377,39 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
     def enter_room(self,client_id,room_name):
         room = self.get_from_store(room_name)
-        #check empty
-        if room['game'] == '':
-            client = self.get_from_store(client_id)
-            client['room'] = room_name
-            self.store_object(client_id,client)
-
-            if client_id not in room['members']:
-                room['members'].append(client_id)
-                #Add member names to different list to allow easier processing
-                room['user_names'].append(client['name'])
-                send_payload = {
-                    'type' : 'room_entrance',
-                    'client': { 'id':client_id, 'name':client['name']},
-                    'name' : room_name,
-                    'members' : [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
-                }
-                self.send_room(room,send_payload)
-                self.store_object(room_name,room)
-                self.send_room_list()
-        else:
-            send_payload = {
-                'type' : 'room_occupied',
-                'message' : 'Room {} is not available, a game is in progress.'.format(room['name']),
+        #Limit five players
+        if len(room['members']) >= 5:
+            #Block access
+            payload = {
+                'type' : 'limit_5'
             }
-            self.clients[client_id].sendMessage(json.dumps(send_payload).encode())
+            self.clients[client_id].sendMessage(json.dumps(payload).encode())
+        else:
+            #check empty
+            if room['game'] == '':
+                client = self.get_from_store(client_id)
+                client['room'] = room_name
+                self.store_object(client_id,client)
+
+                if client_id not in room['members']:
+                    room['members'].append(client_id)
+                    #Add member names to different list to allow easier processing
+                    room['user_names'].append(client['name'])
+                    send_payload = {
+                        'type' : 'room_entrance',
+                        'client': { 'id':client_id, 'name':client['name']},
+                        'name' : room_name,
+                        'members' : [ { 'id' : memb ,'name':self.get_from_store(memb)['name'] } for memb in room['members']]
+                    }
+                    self.send_room(room,send_payload)
+                    self.store_object(room_name,room)
+                    self.send_room_list()
+            else:
+                send_payload = {
+                    'type' : 'room_occupied',
+                    'message' : 'Room {} is not available, a game is in progress.'.format(room['name']),
+                }
+                self.clients[client_id].sendMessage(json.dumps(send_payload).encode())
 
     #Send data to a room
     def send_room(self,room,payload):
