@@ -1,8 +1,13 @@
-import sys, redis, uuid,json,ast, threading, random
+import sys, redis, uuid,json,ast, threading, random, os
 
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+print(os.getcwd())
+
+from twisted.application import internet,service
 from twisted.internet import reactor, ssl
 from twisted.web.server import Site
 from twisted.web.static import File
+#from twisted.web.wsgi import WSGIResource
 from twisted.python import log
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol #, listenWS
 from autobahn.twisted.resource import WebSocketResource
@@ -102,10 +107,17 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
 class BroadcastServerFactory(WebSocketServerFactory):
     def __init__(self, url):
         WebSocketServerFactory.__init__(self, url)
+        #self.portNum = 8080
         self.clients = {}
         self.rooms = []
         self.timers = {}
         self.games = []
+
+    #def startService(self):
+        #self._port = reactor.listenSSL(8080, site, contextFactory)
+
+    def stopService(self):
+        return self._port.stopListening()
 
     #Stores an object in Redis
     def store_object(self,id,obj):
@@ -638,20 +650,23 @@ class BroadcastServerFactory(WebSocketServerFactory):
             self.send_room_list()
 
 
-
-
-if __name__ == "__main__":
-    #Clear redis cache
-    R.flushdb()
-    log.startLogging(sys.stdout)
-    contextFactory = ssl.DefaultOpenSSLContextFactory('keys/server.key',
-                                                          'keys/server.crt')
-    ServerFactory = BroadcastServerFactory
-    factory = BroadcastServerFactory("wss://127.0.0.1:8080")
-    factory.protocol = BroadcastServerProtocol
-    resource = WebSocketResource(factory)
-    root = File(".")
-    root.putChild(b"ws", resource)
-    site = Site(root)
-    reactor.listenSSL(8080, site, contextFactory)
-    reactor.run()
+#Clear redis cache
+R.flushdb()
+log.startLogging(sys.stdout)
+contextFactory = ssl.DefaultOpenSSLContextFactory('keys/server.key',
+                                                        'keys/server.crt')
+ServerFactory = BroadcastServerFactory
+factory = BroadcastServerFactory("wss://127.0.0.1:8080")
+factory.protocol = BroadcastServerProtocol
+resource = WebSocketResource(factory)
+application = service.Application("picserver")
+service = internet.TCPServer('8080', factory) 
+#resource = WSGIResource(reactor, reactor.getThreadPool(), factory)
+root = File(".")
+root.putChild(b"ws", resource)
+site = Site(root)
+reactor.listenSSL(8080, site, contextFactory)
+service.setServiceParent(application)
+#reactor.listenSSL(site, contextFactory)
+#
+reactor.run()
